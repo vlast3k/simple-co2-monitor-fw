@@ -21,13 +21,11 @@
 
 #define TIMEOUT_READ_SENSORS 5000
 #define TIMEOUT_LIGHT 10000
-#define ONE_HOUR 60L*1000
 
-//#define DEF_DEBUG
-#define ANALOG_READ_PRECISION 30
+//#define DEBUG
+#define ANALOG_READ_PRECISION 10
 
-#define DEF_DEBUG true
-boolean DEBUG=DEF_DEBUG;
+boolean DEBUG=false;
 //#define ANALOG_READ_PRECISION 15
 //uuuuu
 //#else
@@ -37,19 +35,23 @@ boolean DEBUG=DEF_DEBUG;
 //#endif
 
 //rrrr
-#define EE_FLT_CURRENT_PERIOD_CO2_HIGHESTMV  0
-#define EE_FLT_PREV_PERIOD_CO2_HIGHESTMV 4
-#define EE_4B_HOUR 8
-#define EE_B_HITEMP 12
-#define EE_B_LOTEMP 13
-#define EE_10B_TH 20
+#define EE_FLT_CURRENT_PERIOD_CO2_HIGHESTMV  4
+#define EE_FLT_PREV_PERIOD_CO2_HIGHESTMV 8
+#define EE_4B_HOUR 12
+#define EE_10B_TH 16
+#define EE_1B_WIFIINIT 26
+#define EE_30B_TSKEY 27
+
+#define EE_VERSION 3
 
 void read1sec();
 void processBrightness(byte);
 double analogReadFine(int, byte); 
 void storeColorRanges(char *);
 int espCheckBaudRate();
-void startSerialProxy();
+int startSerialProxy();
+void softwareReset();
+int sendToThingSpeak(int);
 
 
 double currentCO2MaxMv = 0;
@@ -58,29 +60,48 @@ RunningAverage raCO2mv(4);
 RunningAverage raCO2mvNoTempCorr(4);
 RunningAverage raTempC(4);
 RunningAverage raLight(4);
+boolean startedCO2Monitoring = false;
 
 SoftwareSerial esp(ESP_RX, ESP_TX); // RX, TX
 boolean hasESP;
 boolean overrideLeds = false;
 byte overrideBrightness = 255;
-
-void setup() {
-  Serial.begin(9600);
-  Serial.println(F("ATMega is Alive"));
-  hasESP = false;//espFixBaudRate();
-  espOFF();
-
-  initCO2ABC();
-
-  int tt;
-  Serial << "ee" << EEPROM.read(100) << endl;
-
-  initNeopixels();
-}
-
-
+boolean dumpDebuggingInfo = false;
 byte sBrightness = 10;
 uint16_t sPPM = 0;
+char *wifiStat = "n/a";
+void setup() {
+  
+  Serial.begin(9600);
+  if (DEBUG) {
+    Serial << endl << F(".................DEBUG IS ON") << endl <<endl;
+  } 
+  Serial << F("Starting...") << endl;
+  checkEEVersion();
+  hasESP = espFixBaudRate();
+  espOFF();
+  initCO2ABC();
+  if (hasESP) setWifiStat("n/a");
+  else setWifiStat("");
+  //initCO2ABC();
+  initNeopixels();
+//  sPPM= 2222;
+  Serial.println(F("Simple CO2 Monitor. Press any key to display menu"));
+}
+
+void checkEEVersion() {
+  byte eeVersion = EEPROM.get(0, eeVersion);
+  Serial << F("EEPROM Version: ") << eeVersion << endl;
+  if (eeVersion != EE_VERSION) {
+    clearEEPROM();
+    EEPROM.put(0, EE_VERSION);
+  }
+}
+
+void setWifiStat(char* st) {
+  wifiStat = st;
+  oledCO2Level();
+}
 
 void displayDebugInfo() {
   debugInfoCO2ABC();
@@ -90,11 +111,17 @@ void displayDebugInfo() {
 
 void loop() {
   processCO2();
-  oledTechnicalDetails();
+  //oledTechnicalDetails();
   //oledAll();
   processNeopixels();
-  displayDebugInfo();
+  if (dumpDebuggingInfo) {
+    displayDebugInfo();
+    oledTechnicalDetails();
+  } else {
+    oledCO2Level();
+  }
   processUserInput();
+  processSendData();
 //  delay(1000);
 //
 //  sendToThingSpeak("", 234);

@@ -57,16 +57,13 @@ void initNeopixels() {
   initColorRanges();
   pixels.begin();
   for (int i=0; i< 6; i++) pixels.setPixelColor(i, colors[i]);
-  pixels.setBrightness(80);
+  pixels.setBrightness(20);
   pixels.show();
 }
 
 void debugInfoNeopixel() {
-    Serial << "Brightness  :" << sBrightness<< endl;
-  
+  Serial << F("Brightness  :") << sBrightness<< endl;
 }
-
-
 
 void processBrightness() {
   if (overrideBrightness == 255) { 
@@ -80,6 +77,7 @@ void processBrightness() {
 }
 
 void processColors() {
+  if (!sPPM) return;
   byte idx = ppm2idx(sPPM);
   uint32_t color = idx2color(idx);
   byte i = 0;
@@ -102,7 +100,6 @@ void processNeopixels() {
        processBrightness();
   } else {
     processColors();
-    processBrightness();
- 
+    processBrightness(); 
   }
 }

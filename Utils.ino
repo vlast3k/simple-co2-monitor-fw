@@ -49,4 +49,14 @@ double analogReadFine(int pin, byte prec = 30) {
   return (double)sum / (prec * 1000);
 }
 
+void softwareReset() {
+  Serial << endl << "Restarting..." << endl;
+  delay(300);
+  asm volatile ("  jmp 0");  
+}  
+
+void clearEEPROM() {
+  for (int i=0; i < 100; i++) EEPROM.write(i, 255);
+}
+
 

@@ -3,11 +3,13 @@ uint32_t CO2_FIRST_PROCESS_TIME; //=  60L*15*1000  //how much to wait before fir
 //#define CO2_FIRST_PROCESS_TIME 60L*15*1000  //how much to wait before first storing of the data usually 15 min
 
 int cfg_lowest_co2_ppm = 400;
-byte cfg_abc_resetHours = 170;
+byte cfg_abc_resetHours = 120;
 
 unsigned long lastEEPROMWrite = 0;
 unsigned long lastCO2Read = 0;
-boolean startedCO2Monitoring = false;
+
+
+#define ONE_HOUR 60L*60*1000
 
 unsigned long timeOneHourStarted = 0;
 
@@ -29,11 +31,11 @@ void processCO2() {
 
   readSensorData();
   
-  if (startedCO2Monitoring || millis() > CO2_FIRST_PROCESS_TIME) {  
+  if (startedCO2Monitoring || (millis() > CO2_FIRST_PROCESS_TIME)) {  
     //once the monitoring starts - rollover will not play
     startedCO2Monitoring = true;  
- //   processHiLoTemp();
     processCO2SensorData();
+    co2OnOneHour();
   }
   computeCO2PPM();
 
@@ -44,39 +46,24 @@ void processCO2() {
   }
 }
 
-//void processHiLoTemp() {
-//  byte b;
-//  EEPROM.get(EE_B_HITEMP, b);
-//  if (b < (byte) raTempC.getAverage()) EEPROM.put(EE_B_HITEMP, (byte)raTempC.getAverage());
-//
-//  EEPROM.get(EE_B_LOTEMP, b);
-//  if (b > (byte) raTempC.getAverage()) EEPROM.put(EE_B_LOTEMP, (byte)raTempC.getAverage());
-//  
-//}
-
 void readSensorData() {
   raTempC.addValue(getTermistorC(getVolts(1023 - analogReadFine(TEMP_PIN, ANALOG_READ_PRECISION))));
   double dd = getVolts(analogReadFine(CO2_PIN, ANALOG_READ_PRECISION));
   raCO2mv.addValue(getCO2_Mv(dd, true)); 
   raCO2mvNoTempCorr.addValue(getCO2_Mv(dd, false));
-  //Serial << F("Temp  : ") << raTempC.getAverage() << F(" C") << endl;
-  //Serial << F("CO2 RA: ") << raCO2mv.getAverage() << F(" mv") << endl;
 }
 
 void processCO2SensorData() {
-  //  Serial << F("  currentCO2MaxMv: ") << currentCO2MaxMv << F(" mv") << endl;
   //the default ppm is 350, that is - we need to adjust the values as if they had hit the max ppm of 350. We assume that 400 ppm is the lowest that can be received
   double co2MvAdj = raCO2mv.getAverage() + ppm2mv((double)cfg_lowest_co2_ppm);
   if (co2MvAdj > currentCO2MaxMv) {
     //update the current max CO2, and store it. Since the Read Timeout is 60 seconds, this is will ensure that there will be only a limited stores to the Flash memory until the treshold is reached. Maximum should be 5000 times, until the sensor warms for a few days, and only if it sits outside
-    //  Serial << F(" >>> Found higher CO2 Max Mv") << endl;
     currentCO2MaxMv = co2MvAdj;
   }
 }
 
 void computeCO2PPM() {
   sPPM = mv2ppm(getCO2MaxMv() - raCO2mv.getAverage());
-  //Serial << F("CO2 PPM: ") << sPPM << endl;
 }
 
 void co2OnOneHour() {
@@ -114,9 +101,7 @@ byte eeGetHours() {
       pos = i;
     }
   }
-
   return maxH;
-  
 }
 
 byte eeAddHourAndReturn() {

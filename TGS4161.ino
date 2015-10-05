@@ -2,7 +2,6 @@
 #define TEMPCORR 0.8D
 #define GAIN 5.7f
 
-
 #define MV_AT_1000 (double)25.0d
 #define PPM_AT_0 350.0d
 #define LOG_OF_PPM_AT_0 log10((double)PPM_AT_0)

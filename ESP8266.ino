@@ -113,7 +113,7 @@ int sendTsInt(int value) {
   
   esp << TS_GET << key << TS_FIELD << value << endl << endl;
  // if (!serialFind(OK, true, 6000)) return -3;
-  if (!serialFind("CLOSED", DEBUG, 6000)) return -4;
+  if (!serialFind("CLOSED", true, 6000)) return -4;
   return 1;
 }
 
@@ -139,7 +139,7 @@ void processSendData() {
 
   int res = sendToThingSpeak(sPPM);
   
-  //Serial << F("TS RES:") << res << endl;
+  Serial << F("TS RES:") << res << endl;
   espOFF();
   tmWifiSent = millis();
   

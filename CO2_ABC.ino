@@ -35,7 +35,10 @@ void processCO2() {
     //once the monitoring starts - rollover will not play
     startedCO2Monitoring = true;  
     processCO2SensorData();
-    co2OnOneHour();
+    if (!startedCO2Monitoring) {
+      storeCurrentCO2MaxMv();
+      startedCO2Monitoring = true;  
+    }
   }
   computeCO2PPM();
 
@@ -66,8 +69,12 @@ void computeCO2PPM() {
   sPPM = mv2ppm(getCO2MaxMv() - raCO2mv.getAverage());
 }
 
+void storeCurrentCO2MaxMv() {
+  EEPROM.put(EE_FLT_CURRENT_PERIOD_CO2_HIGHESTMV, currentCO2MaxMv);  
+}
+
 void co2OnOneHour() {
-  EEPROM.put(EE_FLT_CURRENT_PERIOD_CO2_HIGHESTMV, currentCO2MaxMv);
+  storeCurrentCO2MaxMv();
   if (eeAddHourAndReturn() == cfg_abc_resetHours) {
     for (byte i=0; i < 4; i++) EEPROM.put(EE_4B_HOUR + i, (byte)0);
     EEPROM.put(EE_FLT_PREV_PERIOD_CO2_HIGHESTMV, currentCO2MaxMv);

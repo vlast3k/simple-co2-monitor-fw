@@ -101,17 +101,20 @@ int sendTsInt(int value) {
   
   Serial << F("TS KEY:") << key << endl;
   Serial << F("Sending to ThingSpeak") << endl;
-  if (key[0] == 0 || key[1] == -1) return -4; //no tskey
+  if (key[0] == 0 || key[1] == -1) return -1; //no tskey
   if (!initESPForSending()) return 0;
   Serial << endl;
   esp << F("AT+CIPSTART=\"TCP\",\"184.106.153.149\",80") << endl;
-  if (!serialFind(OK, DEBUG, 4000)) return -1;
-  
-  int len = TS_GET_LEN + strlen(key) + TS_FIELD_LEN + String(value).length() + 2;
+  if (!serialFind(OK, true, 4000)) return -2;
+  char sendstr[100];
+  sprintf(sendstr, "GET /update?key=%s&field1=%d\n\n", key, value);
+ 
+  int len = strlen(sendstr);
+  //TS_GET_LEN + strlen(key) + TS_FIELD_LEN + String(value).length() + 2;
   esp << F("AT+CIPSEND=") << len << endl;
-  if (!serialFind(">", DEBUG, 6000)) return -2;
-  
-  esp << TS_GET << key << TS_FIELD << value << endl << endl;
+  if (!serialFind(">", true, 6000)) return -3;
+  esp << sendstr;
+//  esp << TS_GET << key << TS_FIELD << value << endl << endl<<endl << endl;
  // if (!serialFind(OK, true, 6000)) return -3;
   if (!serialFind("CLOSED", true, 6000)) return -4;
   return 1;
@@ -122,8 +125,8 @@ int sendToThingSpeak(int value) {
   int res = sendTsInt(value);
   if (res == 0) setWifiStat("No Wi-Fi");
   else if (res == 1) setWifiStat("OK");
-  else if (res == -4) setWifiStat("No TS Key");
-  else if (res < 0 ) setWifiStat("Failed Send");
+  else if (res == -1) setWifiStat("No TS Key");
+  else if (res < -1 ) setWifiStat("Error");
   return res;  
 }
 
@@ -138,8 +141,12 @@ void processSendData() {
 
 
   int res = sendToThingSpeak(sPPM);
+  if (res < -1) {
+    Serial << endl << F("Retrying") << endl;
+    res = sendToThingSpeak(sPPM);
+  }
   
-  Serial << F("TS RES:") << res << endl;
+  Serial << endl << F("TS RES: ") << res << endl;
   espOFF();
   tmWifiSent = millis();
   

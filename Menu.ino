@@ -31,16 +31,14 @@ byte readLine(int timeout) {
   while (millis() < deadline) {
     if (Serial.available()) {
       line[i++] = (char) Serial.read();
-      
-//      Serial << "line." << i-1 << "=" << (int)line[i-1] << endl;
-       if (line[i-1] == 13) {
+       if (line[i-1] == 10) {
           i--;
           continue;
         }
 
       if (i == LINE_LEN - 1) {
         break;
-      } else if (line[i-1] == 10) {
+      } else if (line[i-1] == 13) {
         line[i-1] = 0;
         Serial.flush();
         return i-1;
@@ -63,7 +61,7 @@ void removeCRNL(char * str) {
 // --------- MAIN menu handlers -----------------------
 
 int menuPrintMain() {
-  Serial << endl << F("(1) Set LED Tresholds") << endl;
+  Serial << endl << F("(1) Set LED Thresholds") << endl;
   if (hasESP) Serial << F("(2) Configure WIFI") << endl;
   Serial << F("(d) Enable display debugging info") << endl;
   Serial << F("(r) Factory Reset (no prompt!)") << endl;
@@ -131,8 +129,8 @@ int menuWifi() {
   Serial << endl << F("(1) Set SSID") << endl;
   Serial << F("(2) Set Password") << endl;
   Serial << F("(3) Connect") << endl;
-  Serial << F("(4) Start proxy to ESP8266") << endl;
-  Serial << F("(5) Set ThingSpeak API Key") << endl;
+//  Serial << F("(4) Start proxy to ESP8266") << endl;
+  Serial << F("(4) Set ThingSpeak API Key") << endl;
   Serial << F("Select Option or (q)uit: ");
   menuHandler = handleWifi;
   return 1;
@@ -142,8 +140,8 @@ int handleWifi() {
   if (line[0] == '1') return menuWifiEnterSSID();
   if (line[0] == '2') return menuWifiEnterPass();
   if (line[0] == '3') return menuWifiConnect();
-  if (line[0] == '4') return startSerialProxy();
-  if (line[0] == '5') return menuWifiEnterTSKey();
+  if (line[0] == 'p') return startSerialProxy();
+  if (line[0] == '4') return menuWifiEnterTSKey();
   return menuPrintMain();
 }
 

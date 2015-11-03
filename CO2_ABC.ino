@@ -33,7 +33,6 @@ void processCO2() {
   
   if (startedCO2Monitoring || (millis() > CO2_FIRST_PROCESS_TIME)) {  
     //once the monitoring starts - rollover will not play
-    startedCO2Monitoring = true;  
     processCO2SensorData();
     if (!startedCO2Monitoring) {
       storeCurrentCO2MaxMv();

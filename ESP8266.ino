@@ -64,6 +64,7 @@ int setESPWifiPass(const char *ssid, const char *pass) {
   if (!serialFind(GOTIP, DEBUG, 20000)) return -2;
   esp << F("AT+CWAUTOCONN=1") << endl;
   EEPROM.put(EE_1B_WIFIINIT, 1);
+  Serial << F("WIFI OK!") << endl;
   return 1;  
 }
 
@@ -107,7 +108,7 @@ int sendTsInt(int value) {
   esp << F("AT+CIPSTART=\"TCP\",\"184.106.153.149\",80") << endl;
   if (!serialFind(OK, true, 4000)) return -2;
   char sendstr[100];
-  sprintf(sendstr, "GET /update?key=%s&field1=%d\n\n", key, value);
+  sprintf(sendstr, "GET /update?key=%s&field1=%d&field2=%d\n\n", key, value, (int)getEECurrentCO2MaxMv());
  
   int len = strlen(sendstr);
   //TS_GET_LEN + strlen(key) + TS_FIELD_LEN + String(value).length() + 2;

@@ -190,7 +190,8 @@ int menuWifiConnect() {
 }
 
 int menuWifiEnterTSKey() {
-  Serial << endl << F("Enter ThingSpeak Key: ") << endl;
+  EEPROM.get(EE_30B_TSKEY, line);
+  Serial << endl << F("Enter ThingSpeak Key: ") << line << endl;
   menuHandler = onWifiEnterTSKey; 
   return 1;
 }

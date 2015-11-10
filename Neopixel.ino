@@ -86,20 +86,20 @@ void processColors() {
   pixels.show(); 
 }
 
-void overrideLedsMax() {
-  int col = 5;
-  for (int i=0; i < col   ; i++) pixels.setPixelColor(i, colors[col-1]);
-  //pixels.setBrightness(200);
-  pixels.show();
-  
-}
+//void overrideLedsMax() {
+//  int col = 5;
+//  for (int i=0; i < col   ; i++) pixels.setPixelColor(i, colors[col-1]);
+//  //pixels.setBrightness(200);
+//  pixels.show();
+//  
+//}
 
 void processNeopixels() {
-  if (overrideLeds) {
-    overrideLedsMax();
-       processBrightness();
-  } else {
+//  if (overrideLeds) {
+//    overrideLedsMax();
+//       processBrightness();
+//  } else {
     processColors();
     processBrightness(); 
-  }
+ // }
 }

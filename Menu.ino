@@ -62,7 +62,8 @@ void removeCRNL(char * str) {
 
 int menuPrintMain() {
   Serial << endl << F("(1) Set LED Thresholds") << endl;
-  if (hasESP) Serial << F("(2) Configure WIFI") << endl;
+  if (hasESP) Serial << F("(w) Configure WIFI") << endl;
+  Serial << F("(b) Set LED Brightness") << endl;
   Serial << F("(d) Enable display debugging info") << endl;
   Serial << F("(r) Factory Reset (no prompt!)") << endl;
   if (DEBUG) Serial << F("(s) Simulate CO2") << endl;
@@ -73,12 +74,31 @@ int menuPrintMain() {
 
 int menuChooseOption() {
   if (line[0] == '1')           return menuMainDisplayColorRanges();
-  if (line[0] == '2' && hasESP) return menuWifi(); 
+  if (line[0] == 'w' && hasESP) return menuWifi(); 
+  if (line[0] == 'b')           return menuSetLedBrightness(); 
   if (line[0] == 'r')           return menuMainFactoryReset(); 
   if (line[0] == 'd')           return switchDebugInfoPrint(); 
   if (line[0] == 's' && DEBUG) return simulateCO2();
   return 0;
 }  
+
+int menuSetLedBrightness() {
+  Serial << endl << F("Current value: ") << overrideBrightness<< endl;
+  Serial << F("Enter LED Brightness 0-100% (255 for auto)") << endl;
+  menuHandler = menuEnterLedBrightness;
+  return 1;
+}
+
+int menuEnterLedBrightness() {
+  //Serial  << line << ",," << String(line).toInt() << endl;
+  int res = String(line).toInt();
+  if (res < 255) res = constrain(res, 0, 150);
+  overrideBrightness = res;
+  Serial << F("New Brightness value: ") << overrideBrightness << endl;
+  EEPROM.write(EE_1B_BRG, overrideBrightness);
+  //menuHandler = menuPrintMain;
+  return 0;
+}
 
 int menuMainDisplayColorRanges() {
   Serial << endl << F("Current ranges: ");

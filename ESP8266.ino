@@ -96,6 +96,7 @@ int initESPForSending() {
   }
 }
 
+
 int sendTsInt(int value) {
   char key[30];
   EEPROM.get(EE_30B_TSKEY, key);
@@ -108,8 +109,12 @@ int sendTsInt(int value) {
   esp << F("AT+CIPSTART=\"TCP\",\"184.106.153.149\",80") << endl;
   if (!serialFind(OK, true, 4000)) return -2;
   char sendstr[100];
-  sprintf(sendstr, "GET /update?key=%s&field1=%d&field2=%d\n\n", key, value, (int)getEECurrentCO2MaxMv());
- 
+  sprintf(sendstr, "GET /update?key=%s&field1=%d&field2=%d.%d&field3=%d.%d&field4=%d.%d&field5=%d.%d\n\n", key, value,
+   (int)raCO2mvNoTempCorr.getAverage(), getFloat(raCO2mvNoTempCorr.getAverage()),
+   (int)raCO2mv.getAverage(), getFloat(raCO2mv.getAverage()),
+   (int)currentCO2MaxMv, getFloat(currentCO2MaxMv),
+   (int)raTempC.getAverage(), getFloat(raTempC.getAverage()));
+ // Serial << sendstr << endl;
   int len = strlen(sendstr);
   //TS_GET_LEN + strlen(key) + TS_FIELD_LEN + String(value).length() + 2;
   esp << F("AT+CIPSEND=") << len << endl;

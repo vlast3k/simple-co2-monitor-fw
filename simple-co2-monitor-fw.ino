@@ -42,7 +42,7 @@ boolean DEBUG=false;
 #define EE_1B_WIFIINIT 26
 #define EE_30B_TSKEY 27
 #define EE_1B_HASWIFI 57
-#define EE_1B_BRG 57
+#define EE_1B_BRG 58
 
 #define EE_VERSION 3
 
@@ -78,12 +78,10 @@ void setup() {
   if (DEBUG) {
     Serial << endl << F(".................DEBUG IS ON") << endl <<endl;
   } 
-  Serial << F("Starting...") << endl;
+  Serial << F("Starting... v1.2.1") << endl;
   checkEEVersion();
   initNeopixels();
-  if (EEPROM.read(EE_1B_HASWIFI) == 1) {
-    hasESP = true;
-  } else if (EEPROM.read(EE_1B_HASWIFI) == 2) {
+  if (EEPROM.read(EE_1B_HASWIFI) == 2) {
     hasESP = false;
   } else {
     hasESP = espFixBaudRate();

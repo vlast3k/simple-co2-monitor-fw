@@ -59,4 +59,9 @@ void clearEEPROM() {
   for (int i=0; i < 100; i++) EEPROM.write(i, 255);
 }
 
+int getFloat(float f) {
+  return (f - (int)f)*10;
+}
+
+
 

@@ -68,7 +68,9 @@ void debugInfoNeopixel() {
 void processBrightness() {
   if (overrideBrightness == 255) { 
     raLight.addValue(analogReadFine(LIGHT_PIN, 1));
-    sBrightness = map((int)raLight.getAverage(), 0, 1024, 1, maxBrightness);
+    int maxLightRead = EEPROM.read(EE_1B_ISGRAY) == 1 ? 400 : 1000;
+    int r = constrain((int)raLight.getAverage(), 0, maxLightRead);
+    sBrightness = map(r, 0, maxLightRead, 1, maxBrightness);
   } else {
     sBrightness = overrideBrightness;
   }

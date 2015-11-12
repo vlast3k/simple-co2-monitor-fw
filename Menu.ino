@@ -63,7 +63,7 @@ void removeCRNL(char * str) {
 int menuPrintMain() {
   Serial << endl << F("(1) Set LED Thresholds") << endl;
   if (hasESP) Serial << F("(w) Configure WIFI") << endl;
-  Serial << F("(b) Set LED Brightness") << endl;
+ // Serial << F("(b) Set LED Brightness") << endl;
   Serial << F("(d) Enable display debugging info") << endl;
   Serial << F("(r) Factory Reset (no prompt!)") << endl;
   if (DEBUG) Serial << F("(s) Simulate CO2") << endl;
@@ -78,6 +78,7 @@ int menuChooseOption() {
   if (line[0] == 'b')           return menuSetLedBrightness(); 
   if (line[0] == 'r')           return menuMainFactoryReset(); 
   if (line[0] == 'd')           return switchDebugInfoPrint(); 
+  if (line[0] == 'g')           return switchGrayBox();
   if (line[0] == 's' && DEBUG) return simulateCO2();
   return 0;
 }  
@@ -123,6 +124,18 @@ int menuMainFactoryReset() {
   clearEEPROM();
   Serial << endl << F("Configuration reset...") << endl;
   softwareReset();
+  return 0;
+}
+
+int switchGrayBox() {
+  byte val = EEPROM.read(EE_1B_ISGRAY);
+  if (val == 255) val = 1;
+  else val = 255;
+  EEPROM.update(EE_1B_ISGRAY, val);
+  Serial << endl << F("Box color set to: ");
+  if (val == 1) Serial <<("GRAY");
+  else Serial << F("WHITE");
+  Serial << endl;
   return 0;
 }
 

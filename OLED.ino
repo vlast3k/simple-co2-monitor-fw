@@ -7,7 +7,8 @@ void oledCO2Level() {
   u8g.firstPage();  
 
   do {
-    u8g.setFont(u8g_font_fub35n);
+    if (sBrightness == 1) u8g.setFont(u8g_font_profont11r);
+    else                  u8g.setFont(u8g_font_fub35n);
     u8g.setPrintPos(sPPM < 1000? 33: 5, 47);
     if (sPPM > 0) u8g << sPPM;
     u8g.setFont(u8g_font_profont11r);

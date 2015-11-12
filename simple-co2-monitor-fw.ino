@@ -43,6 +43,7 @@ boolean DEBUG=false;
 #define EE_30B_TSKEY 27
 #define EE_1B_HASWIFI 57
 #define EE_1B_BRG 58
+#define EE_1B_ISGRAY 59
 
 #define EE_VERSION 3
 
@@ -79,13 +80,14 @@ void setup() {
     Serial << endl << F(".................DEBUG IS ON") << endl <<endl;
   } 
   Serial << F("Starting... v1.2.1") << endl;
+  Serial << F("Box color is: ") << EEPROM.read(EE_1B_ISGRAY) << endl;
   checkEEVersion();
   initNeopixels();
   if (EEPROM.read(EE_1B_HASWIFI) == 2) {
     hasESP = false;
   } else {
     hasESP = espFixBaudRate();
-    EEPROM.write(EE_1B_HASWIFI, hasESP? 1:2);
+    EEPROM.update(EE_1B_HASWIFI, hasESP? 1:2);
   }
   if (hasESP) Serial << F("WiFi Enabled") << endl;
   else Serial << F("No WiFi installed") << endl;

@@ -16,13 +16,28 @@ void processUserInput() {
   while (readLine(30000) >= 0) {
     Serial.flush();
     removeCRNL(line);
-    if (!menuHandler()) {
+    Serial << "aaa: " << line << endl;
+    if (strlen(line) > 2) {
+      handleCommand();
+      return;
+    }
+    else if (!menuHandler()) {
       Serial << endl << F("Exiting menu") << endl;
       return;
     }
   }
 
   Serial << F("Menu Timed out") << endl;
+}
+
+void handleCommand() {
+  Serial << F("Received: ") << line << endl;
+  if (line[0] == 's') ssid = String(line).substring(5);
+  if (line[0] == 'p') pass = String(line).substring(5);
+  if (line[0] == 'c') doConnect();
+
+  Serial << F("OK") << endl;
+  //if (line[0]
 }
 
 byte readLine(int timeout) {
@@ -204,7 +219,7 @@ int onWifiEnterPass() {
   return 1;
 }
 
-int menuWifiConnect() {
+int doConnect() {
   Serial << endl << F("Connecting to Wifi...") << endl;
   espToggle();
   if (!serialFind("ready", DEBUG, 6000)) {
@@ -219,6 +234,10 @@ int menuWifiConnect() {
       setWifiStat("WiFi OK");
     }
   }
+}
+
+int menuWifiConnect() {
+  doConnect();
   return menuWifi();  
 }
 

@@ -79,7 +79,7 @@ void setup() {
   if (DEBUG) {
     Serial << endl << F(".................DEBUG IS ON") << endl <<endl;
   } 
-  Serial << F("Starting... v1.2.1") << endl;
+  Serial << F("Starting... v1.2.2") << endl;
   Serial << F("Box color is: ") << EEPROM.read(EE_1B_ISGRAY) << endl;
   checkEEVersion();
   initNeopixels();

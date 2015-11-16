@@ -3,6 +3,7 @@
 #include <avr/power.h>
 #include <Streaming.h>
 #include <EEPROM.h>
+#include <MemoryFree.h>
 
 //#define PIN            A0
 #define PIN            A1
@@ -26,6 +27,7 @@
 #define ANALOG_READ_PRECISION 10
 
 boolean DEBUG=false;
+boolean ESP_DEBUG = true;
 //#define ANALOG_READ_PRECISION 15
 //uuuuu
 //#else
@@ -79,7 +81,7 @@ void setup() {
   if (DEBUG) {
     Serial << endl << F(".................DEBUG IS ON") << endl <<endl;
   } 
-  Serial << F("Starting... v1.2.2") << endl;
+  Serial << F("vAir CO2 Monitor: v1.3") << endl;
   Serial << F("Box color is: ") << EEPROM.read(EE_1B_ISGRAY) << endl;
   checkEEVersion();
   initNeopixels();

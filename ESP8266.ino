@@ -30,18 +30,18 @@ boolean serialFind(char* keyword, boolean trace = false, int timeout = 2000) {
 } 
 
 boolean checkBaudRate(long b) {
-  if (DEBUG) Serial << endl << F("Checking baud rate: ") << b << endl;
+  if (ESP_DEBUG) Serial << endl << F("Checking baud rate: ") << b << endl;
   esp.begin(b);
   espToggle();
-  return serialFind("ready", DEBUG, 6000);
+  return serialFind("ready", ESP_DEBUG, 6000);
 }
 
 boolean espFixBaudRate() {
-  if (DEBUG)  Serial << F("Fixing ESP Baudrate") << endl;
+  if (ESP_DEBUG)  Serial << F("Fixing ESP Baudrate") << endl;
   if (checkBaudRate(9600)) return true;
   if (checkBaudRate(115200L) || checkBaudRate(74880L)) {
     esp << F("AT+UART_DEF=9600,8,1,0,0") << endl;
-    serialFind(OK, DEBUG, 6000);
+    serialFind(OK, ESP_DEBUG, 6000);
     espToggle();
     return checkBaudRate(9600);
   }
@@ -59,9 +59,9 @@ int setESPWifiPass(const char *ssid, const char *pass) {
   if (!serialFind(OK)) return -1;
   esp.flush();
   esp << F("AT") << endl;
-  serialFind(OK, DEBUG, 1000);
+  serialFind(OK, ESP_DEBUG, 1000);
   esp << F("AT+CWJAP_DEF=") << F("\"") << ssid << F("\"") << F(",") << F("\"") << pass << F("\"") << endl;
-  if (!serialFind(GOTIP, DEBUG, 20000)) return -2;
+  if (!serialFind(GOTIP, ESP_DEBUG, 20000)) return -2;
   esp << F("AT+CWAUTOCONN=1") << endl;
   EEPROM.put(EE_1B_WIFIINIT, 1);
   Serial << F("WIFI OK!") << endl;
@@ -87,7 +87,7 @@ int startSerialProxy() {
 int initESPForSending() {
   Serial << F("Starting Wifi Module...") << endl;
   espToggle();
-  Serial << serialFind("ready", DEBUG, 3000) << endl;
+  Serial << serialFind("ready", ESP_DEBUG, 3000) << endl;
   if (!serialFind("GOT IP", true, 30000)) {
     espOFF();
     return 0;
@@ -120,6 +120,8 @@ int sendTsInt(int value) {
   esp << F("AT+CIPSEND=") << len << endl;
   if (!serialFind(">", true, 6000)) return -3;
   esp << sendstr;
+
+  Serial << F("Free mem") << freeMemory() << endl;
 //  esp << TS_GET << key << TS_FIELD << value << endl << endl<<endl << endl;
  // if (!serialFind(OK, true, 6000)) return -3;
   if (!serialFind("CLOSED", true, 6000)) return -4;

@@ -16,10 +16,11 @@ void processUserInput() {
   while (readLine(30000) >= 0) {
     Serial.flush();
     removeCRNL(line);
-    Serial << "aaa: " << line << endl;
     if (strlen(line) > 2) {
-      handleCommand();
-      return;
+      if (!handleCommand()) {
+        Serial << endl << F("Exiting menu") << endl;
+        return;
+      }
     }
     else if (!menuHandler()) {
       Serial << endl << F("Exiting menu") << endl;
@@ -30,14 +31,32 @@ void processUserInput() {
   Serial << F("Menu Timed out") << endl;
 }
 
-void handleCommand() {
-  Serial << F("Received: ") << line << endl;
-  if (line[0] == 's') ssid = String(line).substring(5);
-  if (line[0] == 'p') pass = String(line).substring(5);
+int handleCommand() {
+  String data = String(line).substring(2);
+  if (line[0] == 's') ssid = data;
+  if (line[0] == 'p') pass = data;
   if (line[0] == 'c') doConnect();
+  if (line[0] == 'b') {
+    overrideBrightness = data.toInt();
+    processBrightness();   
+  }
+  if (line[0] == 'o') {
+    sPPM = data.toInt();
+    processColors();
+    oledCO2Level();
+  }
+  if (line[0] == 't') {
+    doSetTSKey(data.c_str());
+  }
+  
+  if (line[0] == 'd') {
+    switchDebugInfoPrint();
+    return 0;
+  }
 
   Serial << F("OK") << endl;
   //if (line[0]
+  return 1;
 }
 
 byte readLine(int timeout) {
@@ -248,11 +267,16 @@ int menuWifiEnterTSKey() {
   return 1;
 }
 
-int onWifiEnterTSKey() {
-  EEPROM.put(EE_30B_TSKEY, line);
+void doSetTSKey(const char *key) {
+  char kk3[30];
+  strcpy(kk3, key);
+  EEPROM.put(EE_30B_TSKEY, kk3);
   Serial << F("Testing connection by sending 456 ppm value") << endl;
   sendToThingSpeak(456);
-  Serial << F("Done") << endl;
+  Serial << F("Done. Please check if 456 was received.") << endl;  
+}
+int onWifiEnterTSKey() {
+  doSetTSKey(line);
   return 0  ;
 }
 

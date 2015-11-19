@@ -11,12 +11,12 @@ void processUserInput() {
 
   Serial.setTimeout(1000);
   if (!Serial.available()) return;
-  
+  boolean inMenu = false;
   Serial.setTimeout(30000);
   while (readLine(30000) >= 0) {
     Serial.flush();
     removeCRNL(line);
-    if (strlen(line) > 2) {
+    if (!inMenu && strlen(line) > 2) {
       if (!handleCommand()) {
         Serial << endl << F("Exiting menu") << endl;
         return;
@@ -26,6 +26,7 @@ void processUserInput() {
       Serial << endl << F("Exiting menu") << endl;
       return;
     }
+    inMenu=true;
   }
 
   Serial << F("Menu Timed out") << endl;
@@ -52,6 +53,12 @@ int handleCommand() {
   if (line[0] == 'd') {
     switchDebugInfoPrint();
     return 0;
+  }
+
+  if (line[0] == 'e') {
+     pinMode(9, INPUT);
+     pinMode(10, INPUT);
+     espToggle();
   }
 
   Serial << F("OK") << endl;

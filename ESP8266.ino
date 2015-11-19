@@ -160,3 +160,41 @@ void processSendData() {
   
 }
 
+int espAuthSAP() {
+  Serial <<"Authenticate SAP " << endl;
+  if (!initESPForSending()) {
+    Serial << "init failed" << endl;
+    return 1;
+  }
+  Serial <<"Sending C \r\n" << endl;
+  esp << "C\r\n" << endl;
+  serialFind("OK!", true, 10000);
+  return 1;
+}
+
+
+int espOTA() {
+  Serial <<"OTA Start " << endl;
+  if (!initESPForSending()) {
+    Serial << "init failed" << endl;
+    return 1;
+  }
+  Serial <<"Sending o \r\n" << endl;
+  esp << "o\r\n" << endl;
+  serialFind("artyy", true, 300000L);
+  return 1;
+}
+
+
+int espPing() {
+  Serial <<"OTA Start " << endl;
+  if (!initESPForSending()) {
+    Serial << "init failed" << endl;
+    return 1;
+  }
+  Serial <<"Sending p \r\n" << endl;
+  esp << "p\r\n" << endl;
+  serialFind("CLOSED", true, 300000L);
+  return 1;
+}
+

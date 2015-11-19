@@ -121,6 +121,9 @@ int menuChooseOption() {
   if (line[0] == 'd')           return switchDebugInfoPrint(); 
   if (line[0] == 'g')           return switchGrayBox();
   if (line[0] == 's' && DEBUG) return simulateCO2();
+  if (line[0] == 'S') return espAuthSAP();
+  if (line[0] == 'O') return espOTA();
+  if (line[0] == 'P') return espPing();
   return 0;
 }  
 

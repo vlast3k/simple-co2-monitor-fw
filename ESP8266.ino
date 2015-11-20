@@ -17,7 +17,7 @@ void espToggle() {
   espON();
 }
 
-boolean serialFind(char* keyword, boolean trace = false, int timeout = 2000) { 
+boolean serialFind(char* keyword, boolean trace = false, unsigned long timeout = 2000) { 
   unsigned long deadline = millis() + timeout;
   while(millis() < deadline) {
     if (esp.available()) {
@@ -56,7 +56,7 @@ bool isWifiInit() {
 int setESPWifiPass(const char *ssid, const char *pass) {
   EEPROM.put(EE_1B_WIFIINIT, 0);
   esp << F("AT+CWMODE_DEF=1") << endl;
-  if (!serialFind(OK)) return -1;
+  if (!serialFind(OK, ESP_DEBUG, 10000)) return -1;
   esp.flush();
   esp << F("AT") << endl;
   serialFind(OK, ESP_DEBUG, 1000);
@@ -180,8 +180,9 @@ int espOTA() {
     return 1;
   }
   Serial <<"Sending o \r\n" << endl;
-  esp << "o\r\n" << endl;
+  esp << "o" << endl;
   serialFind("artyy", true, 300000L);
+  Serial << "espOta: exit" << endl;
   return 1;
 }
 

@@ -53,16 +53,28 @@ bool isWifiInit() {
   return b == 1;
 }
 
-int setESPWifiPass(const char *ssid, const char *pass) {
+boolean isSAPAuth(const char *str) {
+  int n = 0;
+  while (*str) if (*(str++) == '\"') n++;
+  return n == 6;
+  
+}
+
+
+int setESPWifi(const char *str) {
   EEPROM.put(EE_1B_WIFIINIT, 0);
   esp << F("AT+CWMODE_DEF=1") << endl;
   if (!serialFind(OK, ESP_DEBUG, 10000)) return -1;
   esp.flush();
   esp << F("AT") << endl;
   serialFind(OK, ESP_DEBUG, 1000);
-  esp << F("AT+CWJAP_DEF=") << F("\"") << ssid << F("\"") << F(",") << F("\"") << pass << F("\"") << endl;
-  if (!serialFind(GOTIP, ESP_DEBUG, 20000)) return -2;
-  esp << F("AT+CWAUTOCONN=1") << endl;
+  esp << F("AT+CWJAP_DEF=") << str << endl;
+  if (isSAPAuth(str)) {
+    if (!serialFind("Auth - OK!", ESP_DEBUG, 20000)) return -2;
+  } else {
+    if (!serialFind(GOTIP, ESP_DEBUG, 20000)) return -2;
+    esp << F("AT+CWAUTOCONN=1") << endl;
+  }
   EEPROM.put(EE_1B_WIFIINIT, 1);
   Serial << F("WIFI OK!") << endl;
   return 1;  

@@ -23,9 +23,8 @@ byte readLine(int timeout) {
 
 
 void handleCommand() {
-  //if (String(line) == F("dfd"));
   String x = String(line);
-  if      (x.startsWith(F("wifi"))) setESPWifi(trim(&line[4]));
+  if      (x.startsWith(F("wifi"))) doConnect();
   else if (x.startsWith(F( "lt" ))) menuEnterColorRanges(trim(&line[2]));
   else if (x.startsWith(F("debug"))) switchDebugInfoPrint();
   else if (x.startsWith(F("reset"))) menuMainFactoryReset();
@@ -117,6 +116,24 @@ void doSetTSKey(const char *key) {
   sendToThingSpeak(456);
   Serial << F("Done. Please check if 456 was received.") << endl;  
 }
+
+int doConnect() {
+  Serial << endl << F("Connecting to Wifi...") << endl;
+  espToggle();
+  if (!serialFind("ready", ESP_DEBUG, 6000)) {
+    Serial << F("Wifi module not working") << endl;
+  } else {
+    Serial.flush();
+    delay(1000);
+    int res = setESPWifi(trim(&line[4]));
+    if (res < 0) {
+      Serial << F("Could not connect to Wifi: ") << res << endl;
+    } else {
+      setWifiStat("WiFi OK");
+    }
+  }
+}
+
 //int onWifiEnterTSKey() {
 //  doSetTSKey(line);
 //  return 0  ;

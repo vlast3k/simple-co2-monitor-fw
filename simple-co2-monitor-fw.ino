@@ -78,7 +78,7 @@ char *wifiStat = "n/a";
 void setup() {
   
   Serial.begin(9600);
-  Serial.setTimeout(500);
+  //Serial.setTimeout(500);
 
   if (DEBUG) {
     Serial << endl << F(".................DEBUG IS ON") << endl <<endl;

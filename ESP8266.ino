@@ -18,12 +18,18 @@ void espToggle() {
 }
 
 boolean serialFind(char* keyword, boolean trace = false, unsigned long timeout = 2000) { 
-  unsigned long deadline = millis() + timeout;
+  char *k = keyword;
+  unsigned long deadline = millis() + timeout;  
   while(millis() < deadline) {
     if (esp.available()) {
       char ch = esp.read();
       if (trace && (ch > 19 || ch == 10 || ch == 13) && ch < 128) Serial.write(ch);
-      if (ch == *keyword && !*(++keyword)) return true;
+      if (ch == *k) {
+        if (!*(k+1))return true;
+        else k++;
+      } else {
+        k = keyword;
+      }
     }
   }
   return false;  // Timed out

@@ -115,14 +115,14 @@ int initESPForSending() {
 }
 
 
-int sendTsInt(int value) {
+int sendTsInt(int value, boolean init = true) {
   char key[30];
   EEPROM.get(EE_30B_TSKEY, key);
   
   Serial << F("TS KEY:") << key << endl;
   Serial << F("Sending to ThingSpeak") << endl;
   if (key[0] == 0 || key[1] == -1) return -1; //no tskey
-  if (!initESPForSending()) return 0;
+  if (init && !initESPForSending()) return 0;
   Serial << endl;
   esp << F("AT+CIPSTART=\"TCP\",\"184.106.153.149\",80") << endl;
   if (!serialFind(OK, true, 4000)) return -2;
@@ -164,15 +164,21 @@ void processSendData() {
     return;
   }
   if (!timePassed(tmWifiSent, WIFI_SEND_INTERVAL)) return;
-
-
-  int res = sendToThingSpeak(sPPM);
-  if (res < -1) {
-    Serial << endl << F("Retrying") << endl;
-    res = sendToThingSpeak(sPPM);
+  int res = -6;
+  
+  if (initESPForSending()) {
+    for (int i=0; i < 7; i++) {
+      res = sendTsInt(sPPM, false);
+      if (res < -1) {
+        Serial << endl <<endl << F(" === Retrying in 5 sec === ") << endl<< endl;
+        delay(2000);
+      } else {
+        break;
+      }
+    }
   }
   
-  Serial << endl << F("TS RES: ") << res << endl;
+  Serial << endl << F("TS RES: ") << res << endl << F("---------------") << endl;
   espOFF();
   tmWifiSent = millis();
   

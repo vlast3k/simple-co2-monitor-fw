@@ -42,14 +42,16 @@ boolean ESP_DEBUG = true;
 #define EE_4B_HOUR 12
 #define EE_10B_TH 16
 #define EE_1B_WIFIINIT 26
-#define EE_30B_TSKEY 27
-#define EE_1B_HASWIFI 57
+
+//#define EE_1B_HASWIFI 57
 #define EE_1B_BRG 58
 #define EE_1B_ISGRAY 59
+#define EE_40B_UBIKEY 60
+#define EE_40B_UBIVAR 100
+#define EE_40B_TSKEY  140
 
 #define EE_VERSION 3
 
-void read1sec();
 void processBrightness(byte);
 double analogReadFine(int, byte); 
 void storeColorRanges(char *);
@@ -68,7 +70,6 @@ RunningAverage raLight(4);
 boolean startedCO2Monitoring = false;
 
 SoftwareSerial esp(ESP_RX, ESP_TX); // RX, TX
-boolean hasESP;
 //boolean overrideLeds = false;
 byte overrideBrightness = EEPROM.read(EE_1B_BRG);
 boolean dumpDebuggingInfo = false;
@@ -76,29 +77,18 @@ byte sBrightness = 10;
 uint16_t sPPM = 0;
 char *wifiStat = "n/a";
 void setup() {
-  
   Serial.begin(9600);
-  //Serial.setTimeout(500);
-
+  esp.begin(9600);
   if (DEBUG) {
     Serial << endl << F(".................DEBUG IS ON") << endl <<endl;
   } 
-  Serial << F("vAir CO2 Monitor: v1.3") << endl;
+  Serial << F("vAir CO2 Monitor: v1.4") << endl;
   Serial << F("Box color is: ") << EEPROM.read(EE_1B_ISGRAY) << endl;
   checkEEVersion();
   initNeopixels();
-  if (EEPROM.read(EE_1B_HASWIFI) == 2) {
-    hasESP = false;
-  } else {
-    hasESP = espFixBaudRate();
-    EEPROM.update(EE_1B_HASWIFI, hasESP? 1:2);
-  }
-  if (hasESP) Serial << F("WiFi Enabled") << endl;
-  else Serial << F("No WiFi installed") << endl;
   espOFF();
   initCO2ABC();
-  if (hasESP) setWifiStat("n/a");
-  else setWifiStat("");
+  setWifiStat("");
   //initCO2ABC();
 //  sPPM= 2222;
   Serial.println(F("Simple CO2 Monitor. Press any key to display menu"));
@@ -114,7 +104,7 @@ void checkEEVersion() {
 }
 
 void setWifiStat(char* st) {
-  if (!hasESP) return;
+  if (!isWifiInit()) return;
   wifiStat = st;
   oledCO2Level();
 }

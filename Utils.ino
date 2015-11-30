@@ -2,18 +2,6 @@ boolean timePassed(unsigned long since, unsigned long interval) {
   return (unsigned long)(millis() - since) > interval;
 }
 
-void read1sec() {
-  unsigned long i = millis()+1000;
-  char ch;
-  while (millis() < i) {
-    if (esp.available()) {
-      ch = esp.read();
-      if (ch > 9) Serial.write(ch);
-    }
-  }
-  Serial.println("#");
-}
-
 double getVolts(double pinValue) {
    return pinValue * VIN / 1024;
 }

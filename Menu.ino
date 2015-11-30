@@ -28,7 +28,10 @@ void handleCommand() {
   else if (x.startsWith(F( "lt" ))) menuEnterColorRanges(trim(&line[2]));
   else if (x.startsWith(F("debug"))) switchDebugInfoPrint();
   else if (x.startsWith(F("reset"))) menuMainFactoryReset();
-  else if (x.startsWith(F("tskey"))) doSetTSKey(trim(&line[5]));
+  else if (x.startsWith(F("tskey"))) saveLineToEE(trim(&line[5]), EE_40B_TSKEY);
+  else if (x.startsWith(F("ubik")))  saveLineToEE(trim(&line[4]), EE_40B_UBIKEY);
+  else if (x.startsWith(F("ubiv")))  saveLineToEE(trim(&line[4]), EE_40B_UBIVAR);
+  else if (x.startsWith(F("test")))  sendToThingSpeak(567);
   else if (x.startsWith(F("brg"  ))) menuEnterLedBrightness(trim(&line[3]));
   else if (x.startsWith(F("gray" ))) switchGrayBox();
   else if (x.startsWith(F("sim"  ))) simulateCO2();
@@ -37,6 +40,12 @@ void handleCommand() {
   else if (x.startsWith(F("proxy"))) startSerialProxy();
   else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
   else if (x.startsWith(F("esp"  ))) onlyESP();
+}
+
+void saveLineToEE(const char *line, int addr) {
+  char tmp[40];
+  strcpy(tmp, line);
+  EEPROM.put(addr, tmp);  
 }
 
 char* trim(const char *str) {
@@ -108,19 +117,10 @@ int simulateCO2() {
   }
 }
 
-void doSetTSKey(const char *key) {
-  char kk3[30];
-  strcpy(kk3, key);
-  EEPROM.put(EE_30B_TSKEY, kk3);
-  Serial << F("Testing connection by sending 456 ppm value") << endl;
-  sendToThingSpeak(456);
-  Serial << F("Done. Please check if 456 was received.") << endl;  
-}
-
 int doConnect() {
   Serial << endl << F("Connecting to Wifi...") << endl;
   espToggle();
-  if (!serialFind("ready", ESP_DEBUG, 6000)) {
+  if (!serialFind("ready", ESP_DEBUG, 10000)) {
     Serial << F("Wifi module not working") << endl;
   } else {
     Serial.flush();
@@ -133,10 +133,5 @@ int doConnect() {
     }
   }
 }
-
-//int onWifiEnterTSKey() {
-//  doSetTSKey(line);
-//  return 0  ;
-//}
 
       

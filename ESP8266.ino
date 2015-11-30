@@ -25,7 +25,7 @@ boolean serialFind(char* keyword, boolean trace = false, unsigned long timeout =
       char ch = esp.read();
       if (trace && (ch > 19 || ch == 10 || ch == 13) && ch < 128) Serial.write(ch);
       if (ch == *k) {
-        if (!*(k+1))return true;
+        if (!*(k+1)) return true;
         else k++;
       } else {
         k = keyword;
@@ -35,37 +35,16 @@ boolean serialFind(char* keyword, boolean trace = false, unsigned long timeout =
   return false;  // Timed out
 } 
 
-boolean checkBaudRate(long b) {
-  if (ESP_DEBUG) Serial << endl << F("Checking baud rate: ") << b << endl;
-  esp.begin(b);
-  espToggle();
-  return serialFind("ready", ESP_DEBUG, 6000);
-}
-
-boolean espFixBaudRate() {
-  if (ESP_DEBUG)  Serial << F("Fixing ESP Baudrate") << endl;
-  if (checkBaudRate(9600)) return true;
-  if (checkBaudRate(115200L) || checkBaudRate(74880L)) {
-    esp << F("AT+UART_DEF=9600,8,1,0,0") << endl;
-    serialFind(OK, ESP_DEBUG, 6000);
-    espToggle();
-    return checkBaudRate(9600);
-  }
-}
-
-bool isWifiInit() {
-  byte b;
-  EEPROM.get(EE_1B_WIFIINIT, b);
-  return b == 1;
+boolean isWifiInit() {
+  return EEPROM.read(EE_1B_WIFIINIT) == 1;
 }
 
 boolean isSAPAuth(const char *str) {
+  //count number of " to see if there are 3 words
   int n = 0;
   while (*str) if (*(str++) == '\"') n++;
   return n == 6;
-  
 }
-
 
 int setESPWifi(const char *str) {
   EEPROM.put(EE_1B_WIFIINIT, 0);
@@ -97,58 +76,81 @@ int startSerialProxy() {
 }
 
 #define TS_IP F("184.106.153.149")
-#define TS_GET F("GET /update?key=")
-#define TS_GET_LEN 16
-#define TS_FIELD F("&field1=")
-#define TS_FIELD_LEN 8
+#define UBI_IP F("50.23.124.66")
 
-int initESPForSending() {
+boolean initESPForSending() {
   Serial << F("Starting Wifi Module...") << endl;
   espToggle();
   Serial << serialFind("ready", ESP_DEBUG, 3000) << endl;
   if (!serialFind("GOT IP", true, 30000)) {
     espOFF();
-    return 0;
+    return false;
   } else {
-    return 1;
+    Serial <<"FOUND" << endl;
+    return true;
   }
 }
 
-
-int sendTsInt(int value) {
+int lastCO2 = 0;
+boolean makeGETRequestTS(char *s, int value) {
   char key[30];
-  EEPROM.get(EE_30B_TSKEY, key);
+  EEPROM.get(EE_40B_TSKEY, key);
   
   Serial << F("TS KEY:") << key << endl;
-  Serial << F("Sending to ThingSpeak") << endl;
-  if (key[0] == 0 || key[1] == -1) return -1; //no tskey
-  if (!initESPForSending()) return 0;
-  Serial << endl;
-  esp << F("AT+CIPSTART=\"TCP\",\"184.106.153.149\",80") << endl;
-  if (!serialFind(OK, true, 4000)) return -2;
-  char sendstr[100];
-  sprintf(sendstr, "GET /update?key=%s&field1=%d&field2=%d.%d&field3=%d.%d&field4=%d.%d&field5=%d.%d\n\n", key, value,
+  if (key[0] == 0 || key[0] == -1) return false; //no tskey
+  
+  sprintf(s, "GET /update?key=%s&field1=%d&field2=%d.%d&field3=%d.%d&field4=%d.%d&field5=%d.%d&field6=%d\n\n", key, value,
    (int)raCO2mvNoTempCorr.getAverage(), getFloat(raCO2mvNoTempCorr.getAverage()),
    (int)raCO2mv.getAverage(), getFloat(raCO2mv.getAverage()),
    (int)currentCO2MaxMv, getFloat(currentCO2MaxMv),
-   (int)raTempC.getAverage(), getFloat(raTempC.getAverage()));
- // Serial << sendstr << endl;
-  int len = strlen(sendstr);
-  //TS_GET_LEN + strlen(key) + TS_FIELD_LEN + String(value).length() + 2;
-  esp << F("AT+CIPSEND=") << len << endl;
-  if (!serialFind(">", true, 6000)) return -3;
-  esp << sendstr;
+   (int)raTempC.getAverage(), getFloat(raTempC.getAverage()),
+   lastCO2 ? lastCO2 - value: 0);  
 
-  Serial << F("Free mem") << freeMemory() << endl;
-//  esp << TS_GET << key << TS_FIELD << value << endl << endl<<endl << endl;
- // if (!serialFind(OK, true, 6000)) return -3;
-  if (!serialFind("CLOSED", true, 6000)) return -4;
-  return 1;
+   return true;
+}
+
+boolean makeGETRequestUBI(char *s, int value) {
+  char key[40], var[30];
+  EEPROM.get(EE_40B_UBIKEY, key);
+  EEPROM.get(EE_40B_UBIVAR, var);
+  Serial << "UBI:" << key << "," << var << endl;
+  if (key[0] == 0 || key[0] == -1) return false; //no tskey
+  sprintf(s, "GET /api/postvalue/?token=%s&variable=%s&value=%d\n\n", key, var, value);
+  Serial << F("UBI: ") << s << endl;
+  return true;
+}
+
+int sendTsInt(int value, int endpoint) {
+  char sendstr[150];
+  if (endpoint == 1 && !makeGETRequestTS(sendstr, value)) return -1;
+  else if (endpoint == 2 && !makeGETRequestUBI(sendstr, value)) return -1;
+
+  int i;
+  for (i=0; i < 7; i++) {
+    esp << F("AT+CIPSTART=\"TCP\",\"")<< (endpoint == 1 ? TS_IP : UBI_IP) << F("\",80") << endl;
+    if (!serialFind(OK, true, 4000)) continue;
+    
+    esp << F("AT+CIPSEND=") << strlen(sendstr) << endl;
+    if (!serialFind(">", true, 6000)) continue;
+  
+    esp << sendstr;
+    if(serialFind("CLOSED", true, 6000)) break;
+  }
+    
+  return i < 7;
 }
 
 
 int sendToThingSpeak(int value) {
-  int res = sendTsInt(value);
+  int res, res2;
+  
+  if (!initESPForSending() && !initESPForSending()) res = 0; // try to connect to Wifi 2x
+  else {
+    res = sendTsInt(value, 1);
+    res2 = sendTsInt(value, 2);
+  }
+  espOFF();
+  lastCO2 = value;
   if (res == 0) setWifiStat("No Wi-Fi");
   else if (res == 1) setWifiStat("OK");
   else if (res == -1) setWifiStat("No TS Key");
@@ -167,10 +169,6 @@ void processSendData() {
 
 
   int res = sendToThingSpeak(sPPM);
-  if (res < -1) {
-    Serial << endl << F("Retrying") << endl;
-    res = sendToThingSpeak(sPPM);
-  }
   
   Serial << endl << F("TS RES: ") << res << endl;
   espOFF();
@@ -178,41 +176,26 @@ void processSendData() {
   
 }
 
-int espAuthSAP() {
-  Serial <<"Authenticate SAP " << endl;
-  if (!initESPForSending()) {
-    Serial << "init failed" << endl;
-    return 1;
-  }
-  Serial <<"Sending C \r\n" << endl;
-  esp << "C\r\n" << endl;
-  serialFind("OK!", true, 10000);
-  return 1;
-}
-
-
 int espOTA() {
-  Serial <<"OTA Start " << endl;
+  Serial << F("OTA Start") << endl;
   if (!initESPForSending()) {
-    Serial << "init failed" << endl;
+    Serial << F("init failed") << endl;
     return 1;
   }
-  Serial <<"Sending o \r\n" << endl;
-  esp << "o" << endl;
+  esp << F("o") << endl;
   serialFind("artyy", true, 300000L);
-  Serial << "espOta: exit" << endl;
+  Serial << F("espOta: exit") << endl;
   return 1;
 }
 
 
 int espPing() {
-  Serial <<"OTA Start " << endl;
+  Serial << F("Ping ") << endl;
   if (!initESPForSending()) {
-    Serial << "init failed" << endl;
+    Serial << F("init failed") << endl;
     return 1;
   }
-  Serial <<"Sending p \r\n" << endl;
-  esp << "p\r\n" << endl;
+  esp << F("p\r\n") << endl;
   serialFind("CLOSED", true, 300000L);
   return 1;
 }

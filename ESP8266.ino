@@ -120,10 +120,18 @@ boolean makeGETRequestUBI(char *s, int value) {
   return true;
 }
 
+boolean makeGETRequestSAP(char *s, int value) {
+  if (EEPROM.read(EE_1B_HASSAPCFG) != 1) return false;
+  sprintf(s, "sndiot %d\n\n", value);
+  Serial << F("SAP: ") << s << endl;
+  return true;
+}
+
 int sendTsInt(int value, int endpoint) {
   char sendstr[150];
   if (endpoint == 1 && !makeGETRequestTS(sendstr, value)) return -1;
   else if (endpoint == 2 && !makeGETRequestUBI(sendstr, value)) return -1;
+  else if (endpoint == 3 && !makeGETRequestSAP(sendstr, value)) return -1;
 
   int i;
   for (i=0; i < 7; i++) {
@@ -148,6 +156,7 @@ int sendToThingSpeak(int value) {
   else {
     res = sendTsInt(value, 1);
     res2 = sendTsInt(value, 2);
+    res2 = sendTsInt(value, 3);
   }
   espOFF();
   lastCO2 = value;

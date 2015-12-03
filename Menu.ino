@@ -40,6 +40,8 @@ void handleCommand() {
   else if (x.startsWith(F("proxy"))) startSerialProxy();
   else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
   else if (x.startsWith(F("esp"  ))) onlyESP();
+  else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, line[4]-'0');
+  Serial << F("OK") << endl;
 }
 
 void saveLineToEE(const char *line, int addr) {

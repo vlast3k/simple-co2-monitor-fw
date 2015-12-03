@@ -49,6 +49,7 @@ boolean ESP_DEBUG = true;
 #define EE_40B_UBIKEY 60
 #define EE_40B_UBIVAR 100
 #define EE_40B_TSKEY  140
+#define EE_1B_HASSAPCFG  180
 
 #define EE_VERSION 3
 

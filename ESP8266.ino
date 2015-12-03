@@ -96,7 +96,7 @@ boolean makeGETRequestTS(char *s, int value) {
   char key[30];
   EEPROM.get(EE_40B_TSKEY, key);
   
-  Serial << F("TS KEY:") << key << endl;
+  Serial << endl << F("TS KEY:") << key << endl;
   if (key[0] == 0 || key[0] == -1) return false; //no tskey
   
   sprintf(s, "GET /update?key=%s&field1=%d&field2=%d.%d&field3=%d.%d&field4=%d.%d&field5=%d.%d&field6=%d\n\n", key, value,
@@ -113,14 +113,16 @@ boolean makeGETRequestUBI(char *s, int value) {
   char key[40], var[30];
   EEPROM.get(EE_40B_UBIKEY, key);
   EEPROM.get(EE_40B_UBIVAR, var);
-  Serial << "UBI:" << key << "," << var << endl;
+  Serial << endl << "UBI: " << key[0] << endl;
   if (key[0] == 0 || key[0] == -1) return false; //no tskey
+  Serial << endl << F("UBI:") << key << "," << var << endl;
   sprintf(s, "GET /api/postvalue/?token=%s&variable=%s&value=%d\n\n", key, var, value);
   Serial << F("UBI: ") << s << endl;
   return true;
 }
 
 boolean makeGETRequestSAP(char *s, int value) {
+  Serial << endl << F("Send SAP:") << EEPROM.read(EE_1B_HASSAPCFG)  << endl;
   if (EEPROM.read(EE_1B_HASSAPCFG) != 1) return false;
   sprintf(s, "sndiot %d\n\n", value);
   Serial << F("SAP: ") << s << endl;
@@ -192,7 +194,7 @@ int espOTA() {
     return 1;
   }
   esp << F("o") << endl;
-  serialFind("artyy", true, 300000L);
+  serialFind("ready", true, 300000L);
   Serial << F("espOta: exit") << endl;
   return 1;
 }

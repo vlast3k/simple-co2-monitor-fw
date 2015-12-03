@@ -24,6 +24,7 @@ byte readLine(int timeout) {
 
 void handleCommand() {
   String x = String(line);
+  Serial << line << endl;
   if      (x.startsWith(F("wifi"))) doConnect();
   else if (x.startsWith(F( "lt" ))) menuEnterColorRanges(trim(&line[2]));
   else if (x.startsWith(F("debug"))) switchDebugInfoPrint();
@@ -41,13 +42,13 @@ void handleCommand() {
   else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
   else if (x.startsWith(F("esp"  ))) onlyESP();
   else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, line[4]-'0');
-  Serial << F("OK") << endl;
+  Serial << F(">") << endl;
 }
 
-void saveLineToEE(const char *line, int addr) {
-  char tmp[40];
-  strcpy(tmp, line);
-  EEPROM.put(addr, tmp);  
+
+void saveLineToEE(const char *str, int address) {
+  while (*str)  EEPROM.put(address++, (byte)*(str++));
+  EEPROM.put(address, 0);
 }
 
 char* trim(const char *str) {

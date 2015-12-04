@@ -92,12 +92,12 @@ void setup() {
   setWifiStat("");
   //initCO2ABC();
 //  sPPM= 2222;
-  Serial.println(F("Simple CO2 Monitor. Press any key to display menu"));
+//  Serial.println(F("Simple CO2 Monitor. Press any key to display menu"));
 }
 
 void checkEEVersion() {
   byte eeVersion = EEPROM.get(0, eeVersion);
-  Serial << F("EEPROM Version: ") << eeVersion << endl;
+  //Serial << F("EEPROM Version: ") << eeVersion << endl;
   if (eeVersion != EE_VERSION) {
     clearEEPROM();
     EEPROM.put(0, EE_VERSION);

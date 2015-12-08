@@ -36,33 +36,33 @@ void oledCO2Level() {
   } while( u8g.nextPage() );
 }
 
-void oledTechnicalDetails() {
-  u8g.setColorIndex(1);
-  u8g.firstPage();  
-  String runtime = millis2min();
-  int co2mv = (int)raCO2mv.getAverage();
-  int co2maxmv = (int)(getCO2MaxMv() - ppm2mv((double)cfg_lowest_co2_ppm));
-  byte tmp = (byte)raTempC.getAverage();
-    int rng;
-  do {
-    u8g.setFont(u8g_font_profont11r);
-   // u8g.drawFrame(0, 0, 128, 64);
-    //u8g.drawLine(
-    u8g.setPrintPos(1, 22);
-    u8g << F("mv: ") << co2mv << F(", max: ") << co2maxmv;
-    u8g.setPrintPos(1, 33);
-    u8g << F("Tmp: ") << tmp << F(", ") << runtime;
-    u8g.setPrintPos(1, 44);
-    u8g << F("Brg: ") << sBrightness << F(", st: ") << startedCO2Monitoring;
-    u8g.setPrintPos(1, 54);
-    u8g << F("CO2: ") << sPPM;
-    u8g.setPrintPos(1, 64);
-    u8g << F("r");
-    for (byte i=0; i < 5; i++) {
-      EEPROM.get(EE_10B_TH + i*2, rng);
-      u8g << rng/100 << " ";
-    }
-
-
-  } while( u8g.nextPage() );
-}
+//void oledTechnicalDetails() {
+//  u8g.setColorIndex(1);
+//  u8g.firstPage();  
+//  String runtime = millis2min();
+//  int co2mv = (int)raCO2mv.getAverage();
+//  int co2maxmv = (int)(getCO2MaxMv() - ppm2mv((double)cfg_lowest_co2_ppm));
+//  byte tmp = (byte)raTempC.getAverage();
+//    int rng;
+//  do {
+//    u8g.setFont(u8g_font_profont11r);
+//   // u8g.drawFrame(0, 0, 128, 64);
+//    //u8g.drawLine(
+//    u8g.setPrintPos(1, 22);
+//    u8g << F("mv: ") << co2mv << F(", max: ") << co2maxmv;
+//    u8g.setPrintPos(1, 33);
+//    u8g << F("Tmp: ") << tmp << F(", ") << runtime;
+//    u8g.setPrintPos(1, 44);
+//    u8g << F("Brg: ") << sBrightness << F(", st: ") << startedCO2Monitoring;
+//    u8g.setPrintPos(1, 54);
+//    u8g << F("CO2: ") << sPPM;
+//    u8g.setPrintPos(1, 64);
+//    u8g << F("r");
+//    for (byte i=0; i < 5; i++) {
+//      EEPROM.get(EE_10B_TH + i*2, rng);
+//      u8g << rng/100 << " ";
+//    }
+//
+//
+//  } while( u8g.nextPage() );
+//}

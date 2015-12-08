@@ -6,14 +6,14 @@ double getVolts(double pinValue) {
    return pinValue * VIN / 1024;
 }
 
-String millis2min() {
-  int minutes = millis()/1000/60;
-  String res;
-  if (minutes/60) res += String(minutes/60) +"h ";
-  res += String(minutes % 60) + "m ";
-  res += String((millis() / 1000) %60) + "s";
-  return res;
-}
+//String millis2min() {
+//  int minutes = millis()/1000/60;
+//  String res;
+//  if (minutes/60) res += String(minutes/60) +"h ";
+//  res += String(minutes % 60) + "m ";
+//  res += String((millis() / 1000) %60) + "s";
+//  return res;
+//}
 
 double getTermistorC(double volts) {
   double r = (10*volts)/(VIN-volts)*1000;
@@ -38,7 +38,7 @@ double analogReadFine(int pin, byte prec = 30) {
 }
 
 void softwareReset() {
-  Serial << endl << "Restarting..." << endl;
+  Serial << F("\nRestarting...\n");
   delay(300);
   asm volatile ("  jmp 0");  
 }  

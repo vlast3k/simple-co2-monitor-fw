@@ -123,15 +123,15 @@ byte eeAddHourAndReturn() {
 }
 
 void debugInfoCO2ABC() {
-  Serial << F("currCO2Mv   :") << raCO2mv.getAverage() << endl;
-  Serial << F("currCO2MvNoT:") << raCO2mvNoTempCorr.getAverage() << endl;
-  Serial << F("diff        :") << raCO2mvNoTempCorr.getAverage() - raCO2mv.getAverage() << endl;
-  Serial << F("currCO2MaxMv:") << currentCO2MaxMv << endl;
-  Serial << F("prevCO2MaxMv:") << prevCO2MaxMv << endl;
-  Serial << F("temp        :") << raTempC.getAverage() << endl;
-  Serial << F("uptime      :") << millis2min() << endl;
-  Serial << F("hours       :") << eeGetHours() << endl;
-  Serial << F("sPPM        :") << sPPM << endl;     
+  Serial << F("cmv:") << raCO2mv.getAverage() << endl;
+  Serial << F("cMT:") << raCO2mvNoTempCorr.getAverage() << endl;
+  Serial << F("dif:") << raCO2mvNoTempCorr.getAverage() - raCO2mv.getAverage() << endl;
+  Serial << F("cMv:") << currentCO2MaxMv << endl;
+  Serial << F("pMv:") << prevCO2MaxMv << endl;
+  Serial << F("tem:") << raTempC.getAverage() << endl;
+ // Serial << F("upt:") << millis2min() << endl;
+  Serial << F("hou:") << eeGetHours() << endl;
+  Serial << F("sPP:") << sPPM << endl;     
 }
 
 

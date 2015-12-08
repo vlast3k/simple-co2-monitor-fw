@@ -37,10 +37,10 @@ void handleCommand() {
   else if (x.startsWith(F("gray" ))) switchGrayBox();
   else if (x.startsWith(F("sim"  ))) simulateCO2();
   else if (x.startsWith(F("ota"  ))) espOTA();
-  else if (x.startsWith(F("ping" ))) espPing();
+//  else if (x.startsWith(F("ping" ))) espPing();
   else if (x.startsWith(F("proxy"))) startSerialProxy();
   else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
-  else if (x.startsWith(F("esp"  ))) onlyESP();
+//  else if (x.startsWith(F("esp"  ))) onlyESP();
   else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, line[4]-'0');
   Serial << F(">") << endl;
 }
@@ -62,11 +62,11 @@ void setPPM(char *val) {
   oledCO2Level();
 }
 
-void onlyESP() {
-  pinMode(ESP_RX, INPUT);
-  pinMode(ESP_TX, INPUT);
-  espToggle();
-}
+//void onlyESP() {
+//  pinMode(ESP_RX, INPUT);
+//  pinMode(ESP_TX, INPUT);
+//  espToggle();
+//}
 
 int menuEnterLedBrightness(const char *str) {
   //Serial  << line << ",," << String(line).toInt() << endl;
@@ -82,12 +82,12 @@ int menuEnterLedBrightness(const char *str) {
 void menuEnterColorRanges(char *s) {
   storeColorRanges(s);
   processNeopixels();
-  Serial << F("Done") << endl;
+  Serial << F("Done\n");
 }
 
 int menuMainFactoryReset() {
   clearEEPROM();
-  Serial << endl << F("Configuration reset...") << endl;
+  Serial << F("\nConfiguration reset...\n");
   softwareReset();
   return 0;
 }

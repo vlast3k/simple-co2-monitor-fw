@@ -48,25 +48,25 @@ boolean isSAPAuth(const char *str) {
 
 int setESPWifi(const char *str) {
   EEPROM.put(EE_1B_WIFIINIT, 0);
-  esp << F("AT+CWMODE_DEF=1") << endl;
+  esp << F("AT+CWMODE_DEF=1\n");
   if (!serialFind(OK, ESP_DEBUG, 10000)) return -1;
   esp.flush();
-  esp << F("AT") << endl;
+  esp << F("AT\n");
   serialFind(OK, ESP_DEBUG, 1000);
   esp << F("AT+CWJAP_DEF=") << str << endl;
   if (isSAPAuth(str)) {
     if (!serialFind("Auth - OK!", ESP_DEBUG, 20000)) return -2;
   } else {
     if (!serialFind(GOTIP, ESP_DEBUG, 20000)) return -2;
-    esp << F("AT+CWAUTOCONN=1") << endl;
+    esp << F("AT+CWAUTOCONN=1\n");
   }
   EEPROM.put(EE_1B_WIFIINIT, 1);
-  Serial << F("WIFI OK!") << endl;
+  Serial << F("WIFI OK!\n");
   return 1;  
 }
 
 int startSerialProxy() {
-  Serial << F("ESP Proxy") << endl;
+  Serial << F("ESP Proxy\n");
   espToggle();
   for (;;) {
     if (esp.available())    Serial.write(esp.read());
@@ -79,14 +79,14 @@ int startSerialProxy() {
 #define UBI_IP F("50.23.124.66")
 
 boolean initESPForSending() {
-  Serial << F("Starting Wifi Module...") << endl;
+  Serial << F("Starting Wifi Module...\n");
   espToggle();
   Serial << serialFind("ready", ESP_DEBUG, 3000) << endl;
   if (!serialFind("GOT IP", true, 30000)) {
     espOFF();
     return false;
   } else {
-    Serial <<"FOUND" << endl;
+    Serial << F("FOUND\n");
     return true;
   }
 }
@@ -113,7 +113,7 @@ boolean makeGETRequestUBI(char *s, int value) {
   char key[40], var[30];
   EEPROM.get(EE_40B_UBIKEY, key);
   EEPROM.get(EE_40B_UBIVAR, var);
-  Serial << endl << "UBI: " << key[0] << endl;
+  //Serial << endl << "UBI: " << key[0] << endl;
   if (key[0] == 0 || key[0] == -1) return false; //no tskey
   Serial << endl << F("UBI:") << key << "," << var << endl;
   sprintf(s, "GET /api/postvalue/?token=%s&variable=%s&value=%d\n\n", key, var, value);
@@ -199,15 +199,15 @@ int espOTA() {
   return 1;
 }
 
-
-int espPing() {
-  Serial << F("Ping ") << endl;
-  if (!initESPForSending()) {
-    Serial << F("init failed") << endl;
-    return 1;
-  }
-  esp << F("p\r\n") << endl;
-  serialFind("CLOSED", true, 300000L);
-  return 1;
-}
+//
+//int espPing() {
+//  Serial << F("Ping ") << endl;
+//  if (!initESPForSending()) {
+//    Serial << F("init failed") << endl;
+//    return 1;
+//  }
+//  esp << F("p\r\n") << endl;
+//  serialFind("CLOSED", true, 300000L);
+//  return 1;
+//}
 

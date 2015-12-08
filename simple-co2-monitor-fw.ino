@@ -1,9 +1,9 @@
 #include <RunningAverage.h>
 #include <SoftwareSerial.h>
-#include <avr/power.h>
+//#include <avr/power.h>
 #include <Streaming.h>
 #include <EEPROM.h>
-#include <MemoryFree.h>
+//#include <MemoryFree.h>
 
 //#define PIN            A0
 #define PIN            A1
@@ -81,15 +81,16 @@ void setup() {
   Serial.begin(9600);
   esp.begin(9600);
   if (DEBUG) {
-    Serial << endl << F(".................DEBUG IS ON") << endl <<endl;
+    Serial <<  F("\n\nDEBUG\n\n");
   } 
-  Serial << F("vAir CO2 Monitor: v1.4") << endl;
-  Serial << F("Box color is: ") << EEPROM.read(EE_1B_ISGRAY) << endl;
+  Serial << F("vAir CO2 Monitor: v1.5\n");// << endl;
+  Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
   checkEEVersion();
   initNeopixels();
   espOFF();
   initCO2ABC();
   setWifiStat("");
+  //tone(1, 20000, 1000);
   //initCO2ABC();
 //  sPPM= 2222;
 //  Serial.println(F("Simple CO2 Monitor. Press any key to display menu"));
@@ -123,10 +124,11 @@ void loop() {
   processNeopixels();
   if (dumpDebuggingInfo) {
     displayDebugInfo();
-    oledTechnicalDetails();
-  } else {
+    //oledTechnicalDetails();
+  } 
+  //else {
     oledCO2Level();
-  }
+ // }
   processUserInput();
   processSendData();
 //  delay(1000);

@@ -54,12 +54,12 @@ int setESPWifi(const char *str) {
   esp << F("AT\n");
   serialFind(OK, ESP_DEBUG, 1000);
   esp << F("AT+CWJAP_DEF=") << str << endl;
-  if (isSAPAuth(str)) {
-    if (!serialFind("Auth - OK!", ESP_DEBUG, 20000)) return -2;
-  } else {
+  //if (isSAPAuth(str)) {
+  //  if (!serialFind("Auth - OK!", ESP_DEBUG, 20000)) return -2;
+  //} else {
     if (!serialFind(GOTIP, ESP_DEBUG, 20000)) return -2;
     esp << F("AT+CWAUTOCONN=1\n");
-  }
+ // }
   EEPROM.put(EE_1B_WIFIINIT, 1);
   Serial << F("WIFI OK!\n");
   return 1;  

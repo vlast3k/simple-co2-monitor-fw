@@ -4,7 +4,7 @@
 #include <Streaming.h>
 #include <EEPROM.h>
 //#include <MemoryFree.h>
-#include <Timer.h>
+//#include <Timer.h>
 
 //#define PIN            A0
 #define PIN            A1
@@ -79,7 +79,7 @@ byte sBrightness = 10;
 uint16_t sPPM = 0;
 char *wifiStat = "n/a";
 
-Timer *beepTimer = new Timer(60L*5L*1000L);
+//Timer *beepTimer = new Timer(60L*5L*1000L);
 
 void setup() {
   Serial.begin(9600);
@@ -94,10 +94,11 @@ void setup() {
   espOFF();
   initCO2ABC();
   setWifiStat("");
-  makeBeep();
+  //makeBeep();
+ // tone(A4, 200);
   
-  beepTimer->setOnTimer(&handleBeep);
-  beepTimer->Start();
+ //beepTimer->setOnTimer(&handleBeep);
+ // beepTimer->Start();
   //tone(1, 20000, 1000);
   //initCO2ABC();
 //  sPPM= 2222;
@@ -125,12 +126,13 @@ void displayDebugInfo() {
   Serial << endl;
 }
 
-void handleBeep() {
- // Serial << F("testBEEP\n");
-  if (sPPM > 1800 && sBrightness > 1) makeBeep();
-}
+//void handleBeep() {
+// // Serial << F("testBEEP\n");
+//  if (sPPM > 1800 && sBrightness > 1) makeBeep();
+//}
 
 void loop() {
+  //Serial <<"." << endl;
   processCO2();
   //oledTechnicalDetails();
   //oledAll();
@@ -144,7 +146,7 @@ void loop() {
  // }
   processUserInput();
   processSendData();
-  beepTimer->Update();
+  //beepTimer->Update();
 //  delay(1000);
 //
 //  sendToThingSpeak("", 234);

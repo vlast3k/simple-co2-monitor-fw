@@ -4,6 +4,7 @@
 #include <Streaming.h>
 #include <EEPROM.h>
 //#include <MemoryFree.h>
+#include <Timer.h>
 
 //#define PIN            A0
 #define PIN            A1
@@ -77,19 +78,26 @@ boolean dumpDebuggingInfo = false;
 byte sBrightness = 10;
 uint16_t sPPM = 0;
 char *wifiStat = "n/a";
+
+Timer *beepTimer = new Timer(60L*5L*1000L);
+
 void setup() {
   Serial.begin(9600);
   esp.begin(9600);
   if (DEBUG) {
     Serial <<  F("\n\nDEBUG\n\n");
   } 
-  Serial << F("vAir CO2 Monitor: v1.5\n");// << endl;
+  Serial << F("vAir CO2 Monitor: v1.6\n");// << endl;
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
   checkEEVersion();
   initNeopixels();
   espOFF();
   initCO2ABC();
   setWifiStat("");
+  makeBeep();
+  
+  beepTimer->setOnTimer(&handleBeep);
+  beepTimer->Start();
   //tone(1, 20000, 1000);
   //initCO2ABC();
 //  sPPM= 2222;
@@ -117,6 +125,11 @@ void displayDebugInfo() {
   Serial << endl;
 }
 
+void handleBeep() {
+ // Serial << F("testBEEP\n");
+  if (sPPM > 1800 && sBrightness > 1) makeBeep();
+}
+
 void loop() {
   processCO2();
   //oledTechnicalDetails();
@@ -131,6 +144,7 @@ void loop() {
  // }
   processUserInput();
   processSendData();
+  beepTimer->Update();
 //  delay(1000);
 //
 //  sendToThingSpeak("", 234);

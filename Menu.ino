@@ -39,7 +39,7 @@ void handleCommand() {
   else if (x.startsWith(F("ota"  ))) espOTA();
 //  else if (x.startsWith(F("ping" ))) espPing();
   else if (x.startsWith(F("proxy"))) startSerialProxy();
-  else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
+  //else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
   else if (x.startsWith(F("ppx"  ))) setPPX(trim(&line[3]));
 //  else if (x.startsWith(F("esp"  ))) onlyESP();
   else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, line[4]-'0');
@@ -73,17 +73,15 @@ char* trim(const char *str) {
   while (*str == ' ') str++;
   return (char*)str;
 }
-
-void setPPM(char *val) {
-  sPPM = String(val).toInt();
-  processColors();
-  oledCO2Level();
-}
+//
+//void setPPM(char *val) {
+//  sPPM = String(val).toInt();
+//  processColors();
+//  oledCO2Level();
+//}
 
 void setPPX(char *val) {
-  int extPPM = String(val).toInt();
-  double newMaxMv = getTGSEstMaxMv(extPPM, raCO2mv.getAverage());
-  currentCO2MaxMv = newMaxMv;
+  currentCO2MaxMv = getTGSEstMaxMv(String(val).toInt(), raCO2mv.getAverage());
   storeCurrentCO2MaxMv();  
 }
 

@@ -86,7 +86,7 @@ void setup() {
   Serial.begin(9600);
   esp.begin(9600);
   if (DEBUG) {
-    Serial <<  F("\n\nDEBUG\n\n");
+    Serial <<  F("\n\nDeG\n\n");
   } 
   Serial << F("vAir CO2 Monitor: v1.7\n");// << endl;
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;

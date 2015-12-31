@@ -81,7 +81,9 @@ uint16_t sPPM = 0;
 char *wifiStat = "n/a";
 
 //Timer *beepTimer = new Timer(60L*5L*1000L);
-
+/*
+ * MAX Sketch size should be less than 0x7000 28672 bytes to work with stupid bootloaders
+ */
 void setup() {
   Serial.begin(9600);
   esp.begin(9600);

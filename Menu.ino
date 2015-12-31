@@ -41,28 +41,35 @@ void handleCommand() {
   else if (x.startsWith(F("proxy"))) startSerialProxy();
   //else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
   else if (x.startsWith(F("ppx"  ))) setPPX(trim(&line[3]));
+  else if (x.startsWith(F("rco"  ))) resetCO2();
 //  else if (x.startsWith(F("esp"  ))) onlyESP();
   else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, line[4]-'0');
   //else if (x.startsWith(F("beep"))) makeBeep();
   Serial << F(">") << endl;
 }
 
-void makeBeep() {
-//  Serial << F("BEEP\n");
-  
-  for (int i=0; i<1; i++) {
-    tone(A4, 200, 50);
-    delay(200);
-    tone(A4, 150, 50);
-    delay(200);
-    tone(A4, 100, 50);
-    delay(200);
-    tone(A4, 70, 50);
-    delay(200);
-  }
-
+void resetCO2() {
+  EEPROM.put(EE_FLT_CURRENT_PERIOD_CO2_HIGHESTMV, (double)0);
+  EEPROM.put(EE_FLT_PREV_PERIOD_CO2_HIGHESTMV,    (double)0);
+  prevCO2MaxMv = currentCO2MaxMv = 0;
 }
-
+//
+//void makeBeep() {
+////  Serial << F("BEEP\n");
+//  
+//  for (int i=0; i<1; i++) {
+//    tone(A4, 200, 50);
+//    delay(200);
+//    tone(A4, 150, 50);
+//    delay(200);
+//    tone(A4, 100, 50);
+//    delay(200);
+//    tone(A4, 70, 50);
+//    delay(200);
+//  }
+//
+//}
+//
 
 void saveLineToEE(const char *str, int address) {
   while (*str)  EEPROM.put(address++, (byte)*(str++));

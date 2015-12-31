@@ -40,6 +40,7 @@ void handleCommand() {
 //  else if (x.startsWith(F("ping" ))) espPing();
   else if (x.startsWith(F("proxy"))) startSerialProxy();
   else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
+  else if (x.startsWith(F("ppx"  ))) setPPX(trim(&line[3]));
 //  else if (x.startsWith(F("esp"  ))) onlyESP();
   else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, line[4]-'0');
   //else if (x.startsWith(F("beep"))) makeBeep();
@@ -77,6 +78,13 @@ void setPPM(char *val) {
   sPPM = String(val).toInt();
   processColors();
   oledCO2Level();
+}
+
+void setPPX(char *val) {
+  int extPPM = String(val).toInt();
+  double newMaxMv = getTGSEstMaxMv(extPPM, raCO2mv.getAverage());
+  currentCO2MaxMv = newMaxMv;
+  storeCurrentCO2MaxMv();  
 }
 
 //void onlyESP() {

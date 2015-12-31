@@ -69,6 +69,7 @@ RunningAverage raCO2mv(4);
 RunningAverage raCO2mvNoTempCorr(4);
 RunningAverage raTempC(4);
 RunningAverage raLight(4);
+RunningAverage raCO2Change(4);
 boolean startedCO2Monitoring = false;
 
 SoftwareSerial esp(ESP_RX, ESP_TX); // RX, TX
@@ -87,7 +88,7 @@ void setup() {
   if (DEBUG) {
     Serial <<  F("\n\nDEBUG\n\n");
   } 
-  Serial << F("vAir CO2 Monitor: v1.6\n");// << endl;
+  Serial << F("vAir CO2 Monitor: v1.7\n");// << endl;
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
   checkEEVersion();
   initNeopixels();

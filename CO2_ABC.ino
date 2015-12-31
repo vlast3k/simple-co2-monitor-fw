@@ -54,13 +54,18 @@ void readSensorData() {
   raCO2mv.addValue(getCO2_Mv(dd, true)); 
   raCO2mvNoTempCorr.addValue(getCO2_Mv(dd, false));
 }
-
+   //checkForMaxMV()
 void processCO2SensorData() {
-  //the default ppm is 350, that is - we need to adjust the values as if they had hit the max ppm of 350. We assume that 400 ppm is the lowest that can be received
+  //the default ppm is 350, that is - we need to adjust the values as if they had 
+  //hit the max ppm of 350. We assume that 400 ppm is the lowest that can be received
   double co2MvAdj = raCO2mv.getAverage() + ppm2mv((double)cfg_lowest_co2_ppm);
   if (co2MvAdj > currentCO2MaxMv) {
-    //update the current max CO2, and store it. Since the Read Timeout is 60 seconds, this is will ensure that there will be only a limited stores to the Flash memory until the treshold is reached. Maximum should be 5000 times, until the sensor warms for a few days, and only if it sits outside
+    //update the current max CO2, and store it. Since the Read Timeout is 60 seconds, 
+    // this is will ensure that there will be only a limited stores to the Flash memory
+    // until the treshold is reached. Maximum should be 5000 times, until the sensor warms 
+    // for a few days, and only if it sits outside
     currentCO2MaxMv = co2MvAdj;
+    storeCurrentCO2MaxMv();
   }
 }
 

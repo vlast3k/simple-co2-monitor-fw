@@ -1,5 +1,6 @@
 #define REFTEMP 42.0D
-#define TEMPCORR 0.8D
+//#define TEMPCORR 0.8D
+#define TEMPCORR 0.0D
 #define GAIN 5.7f
 
 #define MV_AT_1000 (double)25.0d
@@ -23,5 +24,9 @@ double getCO2_Mv(double v, boolean tcorr) {
   } else {
     return v/GAIN * 1000;
   }
+}
+
+double getTGSEstMaxMv(int currPPM, double currMv) {
+  return ppm2mv(currPPM) + currMv;
 }
 

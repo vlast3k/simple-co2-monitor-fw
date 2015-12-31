@@ -98,13 +98,16 @@ boolean makeGETRequestTS(char *s, int value) {
   
   Serial << endl << F("TS KEY:") << key << endl;
   if (key[0] == 0 || key[0] == -1) return false; //no tskey
+
+  raCO2Change.addValue(lastCO2 ? value - lastCO2 : 0);
   
-  sprintf(s, "GET /update?key=%s&field1=%d&field2=%d.%d&field3=%d.%d&field4=%d.%d&field5=%d.%d&field6=%d\n\n", key, value,
+  sprintf(s, "GET /update?key=%s&field1=%d&field2=%d.%d&field3=%d.%d&field4=%d.%d&field5=%d.%d&field6=%d.%d&field7=%d\n\n", key, value,
    (int)raCO2mvNoTempCorr.getAverage(), getFloat(raCO2mvNoTempCorr.getAverage()),
    (int)raCO2mv.getAverage(), getFloat(raCO2mv.getAverage()),
    (int)currentCO2MaxMv, getFloat(currentCO2MaxMv),
    (int)raTempC.getAverage(), getFloat(raTempC.getAverage()),
-   lastCO2 ? lastCO2 - value: 0);  
+   (int)raCO2Change.getAverage(), getFloat(raCO2Change.getAverage()),
+   (int)raLight.getAverage());  
 
    return true;
 }

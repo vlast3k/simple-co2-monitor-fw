@@ -189,18 +189,18 @@ void processSendData() {
   tmWifiSent = millis();
   
 }
-
-int espOTA() {
-  Serial << F("OTA Start") << endl;
-  if (!initESPForSending()) {
-    Serial << F("init failed") << endl;
-    return 1;
-  }
-  esp << F("o") << endl;
-  serialFind("ready", true, 300000L);
-  Serial << F("espOta: exit") << endl;
-  return 1;
-}
+//
+//int espOTA() {
+//  Serial << F("OTA Start") << endl;
+//  if (!initESPForSending()) {
+//    Serial << F("init failed") << endl;
+//    return 1;
+//  }
+//  esp << F("o") << endl;
+//  serialFind("ready", true, 300000L);
+//  Serial << F("espOta: exit") << endl;
+//  return 1;
+//}
 
 //
 //int espPing() {

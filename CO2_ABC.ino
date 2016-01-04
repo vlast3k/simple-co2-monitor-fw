@@ -35,7 +35,7 @@ void processCO2() {
     //once the monitoring starts - rollover will not play
     processCO2SensorData();
     if (!startedCO2Monitoring) {
-     // storeCurrentCO2MaxMv();
+      storeCurrentCO2MaxMv();
       startedCO2Monitoring = true;  
     }
   }
@@ -55,23 +55,35 @@ void readSensorData() {
   raCO2mvNoTempCorr.addValue(getCO2_Mv(dd, false));
 }
    //checkForMaxMV()
+uint32_t maxCO2RecheckTimeout = 0;
 void processCO2SensorData() {
   //the default ppm is 350, that is - we need to adjust the values as if they had 
   //hit the max ppm of 350. We assume that 400 ppm is the lowest that can be received
   double co2MvAdj = raCO2mv.getAverage() + ppm2mv((double)cfg_lowest_co2_ppm);
-  if (co2MvAdj > currentCO2MaxMv  && (raTempC.getMax() - raTempC.getMin() < 2)) {
-    //update the current max CO2, and store it. Since the Read Timeout is 60 seconds, 
-    // this is will ensure that there will be only a limited stores to the Flash memory
-    // until the treshold is reached. Maximum should be 5000 times, until the sensor warms 
-    // for a few days, and only if it sits outside
-
-    //if the device is exposed to sudden change of temperature e.g. from outside bring it in 
-    // or vice versa
-    // the temperature measurement and the CO2 measurement may not catch up this is why we check
-    // if the running average of the tempeature has min and max less than 2 degrees, this means
-    // that the temperature has already settled, which means that the device may need to stay out longer
-    currentCO2MaxMv = co2MvAdj;
-    storeCurrentCO2MaxMv();
+  Serial << (raTempC.getMax() - raTempC.getMin()) << endl;
+  Serial << co2MvAdj << endl;
+  if (co2MvAdj > currentCO2MaxMv) {
+    if (maxCO2RecheckTimeout == 0) {
+      maxCO2RecheckTimeout = millis();
+    } else if (timePassed(maxCO2RecheckTimeout, 3L*60L*1000L)) {
+     /* 
+      *  if a new high is found, wait for 3 minutes and only then process it
+      *  this will solve the problem, that may appear if the temperature changes rapidly
+      *  together with CO2 concentration
+      */
+      //update the current max CO2, and store it. Since the Read Timeout is 60 seconds, 
+      // this is will ensure that there will be only a limited stores to the Flash memory
+      // until the treshold is reached. Maximum should be 5000 times, until the sensor warms 
+      // for a few days, and only if it sits outside
+  
+      //if the device is exposed to sudden change of temperature e.g. from outside bring it in 
+      // or vice versa
+      // the temperature measurement and the CO2 measurement may not catch up this is why we check
+      // if the running average of the tempeature has min and max less than 2 degrees, this means
+      // that the temperature has already settled, which means that the device may need to stay out longer
+      currentCO2MaxMv = co2MvAdj;
+      storeCurrentCO2MaxMv();
+    }
   }
 }
 

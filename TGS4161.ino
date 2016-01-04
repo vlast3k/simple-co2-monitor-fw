@@ -8,8 +8,8 @@
 #define LOG_OF_PPM_AT_0 log10((double)PPM_AT_0)
 #define LOG_OF_350 log10(350.0d)
 #define TG_OF_SLOPE (MV_AT_1000/(log10(1000) - LOG_OF_PPM_AT_0))
-#define GRADIENT 64.0
-//#define GRADIENT 71.0
+//#define GRADIENT 64.0
+#define GRADIENT 71.0
 int mv2ppm(double mv) { return pow((double)10, mv / GRADIENT + LOG_OF_350); }
 double ppm2mv(int ppm) { return (log10((double)ppm) - LOG_OF_350) * GRADIENT; }
 

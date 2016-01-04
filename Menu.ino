@@ -35,8 +35,8 @@ void handleCommand() {
   else if (x.startsWith(F("test")))  sendToThingSpeak(567);
   else if (x.startsWith(F("brg"  ))) menuEnterLedBrightness(trim(&line[3]));
   else if (x.startsWith(F("gray" ))) switchGrayBox();
-  else if (x.startsWith(F("sim"  ))) simulateCO2();
-  else if (x.startsWith(F("ota"  ))) espOTA();
+  //else if (x.startsWith(F("sim"  ))) simulateCO2();
+  //else if (x.startsWith(F("ota"  ))) espOTA();
 //  else if (x.startsWith(F("ping" ))) espPing();
   else if (x.startsWith(F("proxy"))) startSerialProxy();
   //else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
@@ -140,15 +140,15 @@ int switchDebugInfoPrint() {
   if (dumpDebuggingInfo) displayDebugInfo();
   return 0;
 }
-
-int simulateCO2() {
-  for (int i = 400; i <=3000; i+=100) {
-    sPPM = i;
-    processNeopixels();
-    oledCO2Level();
-    delay(250);
-  }
-}
+//
+//int simulateCO2() {
+//  for (int i = 400; i <=3000; i+=100) {
+//    sPPM = i;
+//    processNeopixels();
+//    oledCO2Level();
+//    delay(250);
+//  }
+//}
 
 int doConnect() {
   Serial << endl << F("Connecting to Wifi...") << endl;

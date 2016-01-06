@@ -42,6 +42,7 @@ void handleCommand() {
   //else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
   else if (x.startsWith(F("ppx"  ))) setPPX(trim(&line[3]));
   else if (x.startsWith(F("rco"  ))) resetCO2();
+  else if (x.startsWith(F("wsi"  ))) setWifiSendInterval(trim(&line[3]));
 //  else if (x.startsWith(F("esp"  ))) onlyESP();
   else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, line[4]-'0');
   //else if (x.startsWith(F("beep"))) makeBeep();
@@ -86,9 +87,12 @@ char* trim(const char *str) {
 //  processColors();
 //  oledCO2Level();
 //}
+void setWifiSendInterval(char *val) {
+  EEPROM.put(EE_2B_WIFI_SND_INT_S, atoi(val));
+}
 
 void setPPX(char *val) {
-  currentCO2MaxMv = getTGSEstMaxMv(String(val).toInt(), raCO2mv.getAverage());
+  currentCO2MaxMv = getTGSEstMaxMv(atoi(val), raCO2mv.getAverage());
   storeCurrentCO2MaxMv();  
 }
 
@@ -99,8 +103,7 @@ void setPPX(char *val) {
 //}
 
 int menuEnterLedBrightness(const char *str) {
-  //Serial  << line << ",," << String(line).toInt() << endl;
-  int res = String(str).toInt();
+  int res = atoi(str);
   if (res < 255) res = constrain(res, 0, 150);
   overrideBrightness = res;
   Serial << F("New Brightness value: ") << overrideBrightness << endl;
@@ -127,10 +130,10 @@ int switchGrayBox() {
   if (val == 255) val = 1;
   else val = 255;
   EEPROM.update(EE_1B_ISGRAY, val);
-  Serial << endl << F("Box color set to: ");
-  if (val == 1) Serial <<("GRAY");
-  else Serial << F("WHITE");
-  Serial << endl;
+  Serial << F("\nBox:");
+  if (val == 1) Serial << F("G\n");
+  else Serial << F("W\n");
+  //Serial << endl;
   return 0;
 }
 
@@ -151,10 +154,10 @@ int switchDebugInfoPrint() {
 //}
 
 int doConnect() {
-  Serial << endl << F("Connecting to Wifi...") << endl;
+  Serial << endl << F("Connecting to Wifi...\n");
   espToggle();
   if (!serialFind("ready", ESP_DEBUG, 10000)) {
-    Serial << F("Wifi module not working") << endl;
+    Serial << F("Wifi module not working\n");
   } else {
     Serial.flush();
     delay(1000);

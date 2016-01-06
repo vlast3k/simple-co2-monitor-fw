@@ -173,13 +173,15 @@ int sendToThingSpeak(int value) {
 }
 
 uint32_t tmWifiSent = 0;
-#define WIFI_SEND_INTERVAL 120L*1000
 void processSendData() {
   if (!isWifiInit())  {
     setWifiStat("Setup Wifi");
     return;
   }
-  if (!timePassed(tmWifiSent, WIFI_SEND_INTERVAL)) return;
+  int16_t wifiSendInterval;
+  EEPROM.get(EE_2B_WIFI_SND_INT_S, wifiSendInterval);
+  if (wifiSendInterval <= 1) wifiSendInterval = 120;
+  if (!timePassed(tmWifiSent, 1000L * wifiSendInterval)) return;
 
 
   int res = sendToThingSpeak(sPPM);

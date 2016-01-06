@@ -35,7 +35,7 @@ void storeColorRanges(char *p) {
     while (idx < 5) {
       if (isDigit(*p)) num += *p;
       else {
-        EEPROM.put(EE_10B_TH + (idx++ * 2), num.toInt());
+        EEPROM.put(EE_10B_TH + (idx++ * 2), atoi(num.c_str()));
         num = "";
       }
       if (!*p) break;

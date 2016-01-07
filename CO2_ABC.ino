@@ -60,14 +60,12 @@ void processCO2SensorData() {
   //the default ppm is 350, that is - we need to adjust the values as if they had 
   //hit the max ppm of 350. We assume that 400 ppm is the lowest that can be received
   double co2MvAdj = raCO2mv.getAverage() + ppm2mv((double)cfg_lowest_co2_ppm);
-  Serial << (raTempC.getMax() - raTempC.getMin()) << endl;
-  Serial << co2MvAdj << endl;
   if (co2MvAdj > currentCO2MaxMv) {
     if (maxCO2RecheckTimeout == 0) {
       maxCO2RecheckTimeout = millis();
     } else if (timePassed(maxCO2RecheckTimeout, 3L*60L*1000L)) {
      /* 
-      *  if a new high is found, wait for 3 minutes and only then process it
+      *  if a new high is found, wait for 1 minutes and only then process it
       *  this will solve the problem, that may appear if the temperature changes rapidly
       *  together with CO2 concentration
       */
@@ -83,6 +81,7 @@ void processCO2SensorData() {
       // that the temperature has already settled, which means that the device may need to stay out longer
       currentCO2MaxMv = co2MvAdj;
       storeCurrentCO2MaxMv();
+      maxCO2RecheckTimeout = 0;
     }
   }
 }
@@ -147,7 +146,7 @@ byte eeAddHourAndReturn() {
 
 void debugInfoCO2ABC() {
   Serial << F("cmv:") << raCO2mv.getAverage() << endl;
-  Serial << F("cMT:") << raCO2mvNoTempCorr.getAverage() << endl;
+  Serial << F("cNT:") << raCO2mvNoTempCorr.getAverage() << endl;
   Serial << F("dif:") << raCO2mvNoTempCorr.getAverage() - raCO2mv.getAverage() << endl;
   Serial << F("cMv:") << currentCO2MaxMv << endl;
   Serial << F("pMv:") << prevCO2MaxMv << endl;

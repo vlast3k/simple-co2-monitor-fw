@@ -16,7 +16,7 @@ double ppm2mv(int ppm) { return (log10((double)ppm) - LOG_OF_350) * GRADIENT; }
 double tempAdjustMv(double mv) {
 //  return mv;
   //it seems like temeperatures smaller than 18.5 degrees do not affect the sensor
-  return mv + (REFTEMP - max(raTempC.getAverage(), 18.5))*TEMPCORR;
+  return mv + (REFTEMP - max(raTempC.getAverage(), 8.5))*TEMPCORR;
 }
 
 double getCO2_Mv(double v, boolean tcorr) {

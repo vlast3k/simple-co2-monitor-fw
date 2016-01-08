@@ -63,7 +63,9 @@ void processCO2SensorData() {
   if (co2MvAdj > currentCO2MaxMv) {
     if (maxCO2RecheckTimeout == 0) {
       maxCO2RecheckTimeout = millis();
-    } else if (timePassed(maxCO2RecheckTimeout, 3L*60L*1000L)) {
+    } else if (timePassed(maxCO2RecheckTimeout, 1L*60L*1000L)) {
+      //apparently quick calibration by putting the device outside is not stable, so it is best to leave the device
+      //continously on. Now at least there is a 1 minute filter, so that if there is some very quick change - to avoid it
      /* 
       *  if a new high is found, wait for 1 minutes and only then process it
       *  this will solve the problem, that may appear if the temperature changes rapidly
@@ -80,7 +82,7 @@ void processCO2SensorData() {
       // if the running average of the tempeature has min and max less than 2 degrees, this means
       // that the temperature has already settled, which means that the device may need to stay out longer
       currentCO2MaxMv = co2MvAdj;
-      storeCurrentCO2MaxMv();
+      //storeCurrentCO2MaxMv();
       maxCO2RecheckTimeout = 0;
     }
   }

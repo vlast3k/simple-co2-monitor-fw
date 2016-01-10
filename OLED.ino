@@ -4,7 +4,7 @@ U8GLIB_SSD1306_128X64 u8g(6, 7, 8);		// HW SPI Com: CS = 10, A0 = 9 (Hardware Pi
 byte contrast = 0;
 
 void oledCO2Level() {
-  if (dumpDebuggingInfo) return;
+  //if (dumpDebuggingInfo) return;
   u8g.setColorIndex(1);
   u8g.setContrast(255);
   u8g.firstPage();  

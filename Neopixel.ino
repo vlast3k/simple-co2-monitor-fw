@@ -64,13 +64,24 @@ void initNeopixels() {
 void debugInfoNeopixel() {
   Serial << F("Brightness  :") << sBrightness<< endl;
 }
-
+float getBrgFactor() {
+  byte bb = EEPROM.read(EE_1B_BRG_FACTOR);
+  return (float)(bb==255?10:bb) / 10;
+  
+}
 void processBrightness() {
   if (overrideBrightness == 255) { 
     raLight.addValue(analogReadFine(LIGHT_PIN, 1));
     int maxLightRead = EEPROM.read(EE_1B_ISGRAY) == 1 ? 400 : 1000;
-    int r = constrain((int)raLight.getAverage(), 0, maxLightRead);
-    sBrightness = map(r, 0, maxLightRead, 1, maxBrightness);
+    int light = (int)(raLight.getAverage() * getBrgFactor());
+    int r=0;
+    if (light <= 10) {
+      sBrightness = light;
+    } else {
+      r = constrain(light, 0, maxLightRead);
+      sBrightness = map(r, 11, maxLightRead, 11, maxBrightness);
+    }
+    //Serial << maxLightRead << "." << r << "." << sBrightness << "." << maxBrightness << endl;
   } else {
     sBrightness = overrideBrightness;
   }

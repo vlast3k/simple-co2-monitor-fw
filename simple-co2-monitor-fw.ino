@@ -52,6 +52,7 @@ boolean ESP_DEBUG = true;
 #define EE_40B_TSKEY  140
 #define EE_1B_HASSAPCFG    180
 #define EE_2B_WIFI_SND_INT_S  181
+#define EE_1B_BRG_FACTOR  183
 
 #define EE_VERSION 3
 
@@ -75,7 +76,8 @@ boolean startedCO2Monitoring = false;
 
 SoftwareSerial esp(ESP_RX, ESP_TX); // RX, TX
 //boolean overrideLeds = false;
-byte overrideBrightness = EEPROM.read(EE_1B_BRG);
+byte overrideBrightness;
+//float brgFactor;
 boolean dumpDebuggingInfo = false;
 byte sBrightness = 10;
 uint16_t sPPM = 0;
@@ -91,8 +93,9 @@ void setup() {
   if (DEBUG) {
     Serial <<  F("\n\nDeG\n\n");
   } 
-  Serial << F("vAir CO2 Monitor: v1.7\n");// << endl;
+  Serial << F("vAir CO2 Monitor: v1.8\n");// << endl;
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
+  overrideBrightness = EEPROM.read(EE_1B_BRG);
   checkEEVersion();
   initNeopixels();
   espOFF();

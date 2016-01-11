@@ -88,16 +88,17 @@ char *wifiStat = "n/a";
  * MAX Sketch size should be less than 0x7000 28672 bytes to work with stupid bootloaders
  */
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(9600);  
   esp.begin(9600);
   if (DEBUG) {
     Serial <<  F("\n\nDeG\n\n");
   } 
-  Serial << F("vAir CO2 Monitor: v1.8\n");// << endl;
+  Serial << F("vAir CO2 Monitor: v1.8.1\n");// << endl;
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
   overrideBrightness = EEPROM.read(EE_1B_BRG);
   checkEEVersion();
   initNeopixels();
+  
   espOFF();
   initCO2ABC();
   setWifiStat("");

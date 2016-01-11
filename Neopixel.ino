@@ -77,6 +77,7 @@ void processBrightness() {
     int r=0;
     if (light <= 10) {
       sBrightness = light;
+      if (!sBrightness) sBrightness = 1;
     } else {
       r = constrain(light, 0, maxLightRead);
       sBrightness = map(r, 11, maxLightRead, 11, maxBrightness);

@@ -169,7 +169,7 @@ void loop() {
 #else
   //delay(6000);
   sPPM = CM1106__getCO2();
-  Serial << "co2: " << sPPM << endl;
+  //Serial << "co2: " << sPPM << endl;
 #endif
   //oledTechnicalDetails();
   //oledAll();

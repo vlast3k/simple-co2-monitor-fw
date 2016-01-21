@@ -2,11 +2,11 @@
 RunningAverage raCM1106(5);
 
 uint32_t lastNDIRRead = 0;
-#define NDIR_READ_TIMEOUT 30000L
+#define NDIR_READ_TIMEOUT 10000L
 int CM1106__getCO2() {
   if (timePassed(lastNDIRRead, NDIR_READ_TIMEOUT) == false) return (int)raCM1106.getAverage();
   lastNDIRRead = millis();
-  Serial <<"reading\n";
+  //Serial <<"reading\n";
   SoftwareSerial PM1106_swSer(SS_RX, SS_TX);
   uint8_t cmdReadCO2[] = {4, 0x11, 0x01, 0x01, 0xed};
   uint8_t resp[30];

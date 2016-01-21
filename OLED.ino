@@ -21,7 +21,11 @@ void oledCO2Level() {
       u8g.setPrintPos(70, 7);
       u8g << F("Warmup...");
       if (sPPM == 0 && millis() > 4000) {
+#ifdef TGS4161
         uint32_t sec = (CO2_FIRST_PROCESS_TIME - millis()) / 1000L;
+#else
+        uint32_t sec = (130000L - millis()) / 1000L;
+#endif
         u8g.setFont(u8g_font_fub35n);
         u8g.setPrintPos(0, 47);
         u8g << sec;

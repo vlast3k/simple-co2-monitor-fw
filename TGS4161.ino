@@ -1,3 +1,5 @@
+#ifdef TGS4161
+
 #define REFTEMP 38.0D  //when the temperature at home is 22c, inside it is 38, so it is good middle point
 #define TEMPCORR 0.6D
 //#define TEMPCORR 0.0D
@@ -31,3 +33,4 @@ double getTGSEstMaxMv(int currPPM, double currMv) {
   return ppm2mv(currPPM) + currMv;
 }
 
+#endif

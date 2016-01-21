@@ -40,9 +40,11 @@ void handleCommand() {
   //else if (x.startsWith(F("ota"  ))) espOTA();
 //  else if (x.startsWith(F("ping" ))) espPing();
   else if (x.startsWith(F("proxy"))) startSerialProxy();
-  //else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
+  else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
+#ifdef TGS4161
   else if (x.startsWith(F("ppx"  ))) setPPX(trim(&line[3]));
   else if (x.startsWith(F("rco"  ))) resetCO2();
+#endif
   else if (x.startsWith(F("wsi"  ))) setWifiSendInterval(trim(&line[3]));
 //  else if (x.startsWith(F("esp"  ))) onlyESP();
   else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, (byte)(line[4]-'0'));
@@ -50,11 +52,7 @@ void handleCommand() {
   Serial << F(">") << endl;
 }
 
-void resetCO2() {
-  EEPROM.put(EE_FLT_CURRENT_PERIOD_CO2_HIGHESTMV, (double)0);
-  EEPROM.put(EE_FLT_PREV_PERIOD_CO2_HIGHESTMV,    (double)0);
-  prevCO2MaxMv = currentCO2MaxMv = 0;
-}
+
 //
 //void makeBeep() {
 ////  Serial << F("BEEP\n");
@@ -83,19 +81,26 @@ char* trim(const char *str) {
   return (char*)str;
 }
 //
-//void setPPM(char *val) {
-//  sPPM = String(val).toInt();
-//  processColors();
-//  oledCO2Level();
-//}
+void setPPM(char *val) {
+  sPPM = String(val).toInt();
+  processColors();
+  oledCO2Level();
+}
 void setWifiSendInterval(char *val) {
   EEPROM.put(EE_2B_WIFI_SND_INT_S, atoi(val));
 }
-
+#ifdef TGS4161
 void setPPX(char *val) {
   currentCO2MaxMv = getTGSEstMaxMv(atoi(val), raCO2mv.getAverage());
   storeCurrentCO2MaxMv();  
 }
+
+void resetCO2() {
+  EEPROM.put(EE_FLT_CURRENT_PERIOD_CO2_HIGHESTMV, (double)0);
+  EEPROM.put(EE_FLT_PREV_PERIOD_CO2_HIGHESTMV,    (double)0);
+  prevCO2MaxMv = currentCO2MaxMv = 0;
+}
+#endif
 
 //void onlyESP() {
 //  pinMode(ESP_RX, INPUT);

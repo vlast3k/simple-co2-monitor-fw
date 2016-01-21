@@ -1,4 +1,4 @@
-
+#ifdef TGS4161
 uint32_t CO2_FIRST_PROCESS_TIME; //=  60L*15*1000  //how much to wait before first storing of the data usually 15 min
 //#define CO2_FIRST_PROCESS_TIME 60L*15*1000  //how much to wait before first storing of the data usually 15 min
 
@@ -145,8 +145,9 @@ byte eeAddHourAndReturn() {
   EEPROM.put(EE_4B_HOUR + ((i+1) % 4), maxH + 1);
   return maxH + 1;
 }
-
+#endif
 void debugInfoCO2ABC() {
+#ifdef TGS4161
   Serial << F("cmv:") << raCO2mv.getAverage() << endl;
   Serial << F("cNT:") << raCO2mvNoTempCorr.getAverage() << endl;
   Serial << F("dif:") << raCO2mvNoTempCorr.getAverage() - raCO2mv.getAverage() << endl;
@@ -155,6 +156,7 @@ void debugInfoCO2ABC() {
   Serial << F("tem:") << raTempC.getAverage() << endl;
  // Serial << F("upt:") << millis2min() << endl;
   Serial << F("hou:") << eeGetHours() << endl;
+#endif
   Serial << F("sPP:") << sPPM << endl;     
 }
 

@@ -2,11 +2,13 @@ char OK[] = "OK";
 char GOTIP[] = "GOT IP";
 
 void espON() {
+  esp.begin(9600);
   pinMode(ESP_CHPD, OUTPUT);
   digitalWrite(ESP_CHPD, HIGH);
 }
 
 void espOFF() {
+  esp.end();
   pinMode(ESP_CHPD, OUTPUT);
   digitalWrite(ESP_CHPD, LOW);
 }
@@ -100,7 +102,7 @@ boolean makeGETRequestTS(char *s, int value) {
   if (key[0] == 0 || key[0] == -1) return false; //no tskey
 
   raCO2Change.addValue(lastCO2 ? value - lastCO2 : 0);
-  
+#ifdef TGS4161
   sprintf(s, "GET /update?key=%s&field1=%d&field2=%d.%d&field3=%d.%d&field4=%d.%d&field5=%d.%d&field6=%d.%d&field7=%d\n\n", key, value,
    (int)raCO2mvNoTempCorr.getAverage(), getFloat(raCO2mvNoTempCorr.getAverage()),
    (int)raCO2mv.getAverage(), getFloat(raCO2mv.getAverage()),
@@ -108,7 +110,13 @@ boolean makeGETRequestTS(char *s, int value) {
    (int)raTempC.getAverage(), getFloat(raTempC.getAverage()),
    (int)raCO2Change.getAverage(), getFloat(raCO2Change.getAverage()),
    (int)raLight.getAverage());  
+#else
+  sprintf(s, "GET /update?key=%s&field1=%d&field6=%d.%d&field7=%d\n\n", 
+   key, value,
+   (int)raCO2Change.getAverage(), getFloat(raCO2Change.getAverage()),
+   (int)raLight.getAverage());  
 
+#endif
    return true;
 }
 
@@ -178,11 +186,11 @@ void processSendData() {
     setWifiStat("Setup Wifi");
     return;
   }
+  if (sPPM == 0) return;
   int16_t wifiSendInterval;
   EEPROM.get(EE_2B_WIFI_SND_INT_S, wifiSendInterval);
   if (wifiSendInterval <= 1) wifiSendInterval = 120;
   if (!timePassed(tmWifiSent, 1000L * wifiSendInterval)) return;
-
 
   int res = sendToThingSpeak(sPPM);
   

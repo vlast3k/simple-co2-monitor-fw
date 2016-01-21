@@ -29,6 +29,9 @@
 
 boolean DEBUG=false;
 boolean ESP_DEBUG = true;
+
+//#define TGS4161
+
 //#define ANALOG_READ_PRECISION 15
 //uuuuu
 //#else
@@ -38,9 +41,7 @@ boolean ESP_DEBUG = true;
 //#endif
 
 //rrrr
-#define EE_FLT_CURRENT_PERIOD_CO2_HIGHESTMV  4
-#define EE_FLT_PREV_PERIOD_CO2_HIGHESTMV 8
-#define EE_4B_HOUR 12
+
 #define EE_10B_TH 16
 #define EE_1B_WIFIINIT 26
 
@@ -64,15 +65,28 @@ int startSerialProxy();
 void softwareReset();
 int sendToThingSpeak(int);
 
+boolean startedCO2Monitoring = false;
 
+#ifdef TGS4161
+
+#define EE_FLT_CURRENT_PERIOD_CO2_HIGHESTMV  4
+#define EE_FLT_PREV_PERIOD_CO2_HIGHESTMV 8
+#define EE_4B_HOUR 12
 double currentCO2MaxMv = 0;
 double prevCO2MaxMv = 0;
 RunningAverage raCO2mv(4);
 RunningAverage raCO2mvNoTempCorr(4);
 RunningAverage raTempC(4);
+#else
+//TX on CO2 Sensor to CO2 pad
+#define SS_RX CO2_PIN
+
+//RX on CO2 Sensor to TMP pad
+#define SS_TX TEMP_PIN
+#endif
+
 RunningAverage raLight(4);
 RunningAverage raCO2Change(4);
-boolean startedCO2Monitoring = false;
 
 SoftwareSerial esp(ESP_RX, ESP_TX); // RX, TX
 //boolean overrideLeds = false;
@@ -89,18 +103,27 @@ char *wifiStat = "n/a";
  */
 void setup() {
   Serial.begin(9600);  
-  esp.begin(9600);
+ // esp.begin(9600);
   if (DEBUG) {
     Serial <<  F("\n\nDeG\n\n");
   } 
-  Serial << F("vAir CO2 Monitor: v1.8.1\n");// << endl;
+  Serial << F("vAir CO2 Monitor: v1.9\n");// << endl;
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
+//  Serial << CM1106__getCO2() << endl;
+//  startSerialProxy();
+//  #ifndef TGS4161
+//  Serial << CM1106__getCO2() << endl;
+//  Serial << CM1106__getCO2() << endl;
+//  Serial << CM1106__getCO2() << endl;
+//  #endif
   overrideBrightness = EEPROM.read(EE_1B_BRG);
   checkEEVersion();
   initNeopixels();
   
   espOFF();
+#ifdef TGS4161
   initCO2ABC();
+#endif
   setWifiStat("");
   //makeBeep();
  // tone(A4, 200);
@@ -141,7 +164,13 @@ void displayDebugInfo() {
 
 void loop() {
   //Serial <<"." << endl;
+#ifdef TGS4161
   processCO2();
+#else
+  //delay(6000);
+  sPPM = CM1106__getCO2();
+  Serial << "co2: " << sPPM << endl;
+#endif
   //oledTechnicalDetails();
   //oledAll();
   processNeopixels();

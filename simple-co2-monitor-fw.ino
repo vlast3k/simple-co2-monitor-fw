@@ -184,7 +184,7 @@ void loop() {
   processUserInput();
   processSendData();
   //beepTimer->Update();
-//  delay(1000);
+  //delay(10000);
 //
 //  sendToThingSpeak("", 234);
 //  fixBaudRate();

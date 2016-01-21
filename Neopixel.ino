@@ -108,7 +108,13 @@ void processColors() {
 //  
 //}
 
+uint32_t lastNeoPixelChange = 0;
+#define NEOPIXEL_TIMEOUT 15000L
+
 void processNeopixels() {
+  if (timePassed(lastNeoPixelChange, NEOPIXEL_TIMEOUT) == false) return;
+  lastNeoPixelChange = millis();
+   Serial << "neopixels" << endl;
 //  if (overrideLeds) {
 //    overrideLedsMax();
 //       processBrightness();

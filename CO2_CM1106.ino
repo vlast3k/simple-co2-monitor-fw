@@ -4,7 +4,7 @@ RunningAverage raCM1106(5);
 uint32_t lastNDIRRead = 0;
 #define NDIR_READ_TIMEOUT 10000L
 int CM1106__getCO2() {
-  if (timePassed(lastNDIRRead, NDIR_READ_TIMEOUT) == false) return (int)raCM1106.getAverage();
+  if (timePassed(lastNDIRRead, NDIR_READ_TIMEOUT) == false) return sPPM;
   lastNDIRRead = millis();
   //Serial <<"reading\n";
   SoftwareSerial PM1106_swSer(SS_RX, SS_TX);
@@ -16,9 +16,10 @@ int CM1106__getCO2() {
   delay(100);
   for (int i=0; i < 24 && PM1106_swSer.available(); i++) resp[i] = PM1106_swSer.read();
   //dump(resp);
-  raCM1106.addValue(((uint16_t)256)*resp[3] + resp[4]);
+  uint16_t value = ((uint16_t)256)*resp[3] + resp[4];
+  raCM1106.addValue(value);
   PM1106_swSer.end();
-  if ((millis() < 130L*1000) && ((int)raCM1106.getAverage() == 550)) {
+  if ((millis() < 130L*1000) && (value == 550)) {
     startedCO2Monitoring = false;
     return 0;
   } else {

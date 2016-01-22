@@ -167,8 +167,8 @@ void loop() {
 #ifdef TGS4161
   processCO2();
 #else
-  //delay(6000);
   sPPM = CM1106__getCO2();
+  delay(3000);
   //Serial << "co2: " << sPPM << endl;
 #endif
   //oledTechnicalDetails();

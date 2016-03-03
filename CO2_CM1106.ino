@@ -1,12 +1,7 @@
 #ifndef TGS4161
-RunningAverage raCM1106(5);
+RunningAverage raCM1106(2);
 
-uint32_t lastNDIRRead = 0;
-#define NDIR_READ_TIMEOUT 10000L
-int CM1106__getCO2() {
-  if (timePassed(lastNDIRRead, NDIR_READ_TIMEOUT) == false) return sPPM;
-  lastNDIRRead = millis();
-  //Serial <<"reading\n";
+int rawReadCM1106_CO2() {
   SoftwareSerial PM1106_swSer(SS_RX, SS_TX);
   uint8_t cmdReadCO2[] = {4, 0x11, 0x01, 0x01, 0xed};
   uint8_t resp[30];
@@ -19,6 +14,16 @@ int CM1106__getCO2() {
   uint16_t value = ((uint16_t)256)*resp[3] + resp[4];
   raCM1106.addValue(value);
   PM1106_swSer.end();
+  return value;  
+}
+
+uint32_t lastNDIRRead = 0;
+#define NDIR_READ_TIMEOUT 10000L
+int CM1106__getCO2() {
+  if (timePassed(lastNDIRRead, NDIR_READ_TIMEOUT) == false) return sPPM;
+  lastNDIRRead = millis();
+  //Serial <<"reading\n";
+  uint16_t value = rawReadCM1106_CO2();
   if ((millis() < 130L*1000) && (value == 550)) {
     startedCO2Monitoring = false;
     return 0;
@@ -36,6 +41,10 @@ void dump(uint8_t *r) {
     Serial.print(",");
   } 
   Serial.println();
+}
+
+void debugInfoCM1106() {
+  Serial << "CM1106 raw: " << rawReadCM1106_CO2() << endl;
 }
 
 #endif

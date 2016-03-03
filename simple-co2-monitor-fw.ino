@@ -64,6 +64,9 @@ int espCheckBaudRate();
 int startSerialProxy();
 void softwareReset();
 int sendToThingSpeak(int);
+#ifndef TGS4161
+void debugInfoCM1106();
+#endif
 
 boolean startedCO2Monitoring = false;
 
@@ -107,7 +110,7 @@ void setup() {
   if (DEBUG) {
     Serial <<  F("\n\nDeG\n\n");
   } 
-  Serial << F("vAir CO2 Monitor: v1.9\n");// << endl;
+  Serial << F("vAir CO2 Monitor: v1.9.3\n");// << endl;
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
 //  Serial << CM1106__getCO2() << endl;
 //  startSerialProxy();
@@ -123,6 +126,8 @@ void setup() {
   espOFF();
 #ifdef TGS4161
   initCO2ABC();
+//#else
+//  Serial << F("CO2 value: ") << rawReadCM1106_CO2() << endl;
 #endif
   setWifiStat("");
   //makeBeep();
@@ -153,6 +158,9 @@ void setWifiStat(char* st) {
 
 void displayDebugInfo() {
   debugInfoCO2ABC();
+  #ifndef TGS4161
+  debugInfoCM1106();
+  #endif
   debugInfoNeopixel();
   Serial << endl;
 }

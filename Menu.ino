@@ -48,6 +48,7 @@ void handleCommand() {
   else if (x.startsWith(F("wsi"  ))) setWifiSendInterval(trim(&line[3]));
 //  else if (x.startsWith(F("esp"  ))) onlyESP();
   else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, (byte)(line[4]-'0'));
+  else if (x.startsWith(F("ccc"))) Serial << rawReadCM1106_CO2() << endl;
   //else if (x.startsWith(F("beep"))) makeBeep();
   Serial << F(">") << endl;
 }

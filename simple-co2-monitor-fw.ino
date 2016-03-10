@@ -30,7 +30,7 @@
 boolean DEBUG=false;
 boolean ESP_DEBUG = true;
 
-//#define TGS4161
+#define TGS4161
 
 //#define ANALOG_READ_PRECISION 15
 //uuuuu

@@ -35,7 +35,7 @@ void handleCommand() {
   else if (x.startsWith(F("test")))  sendToThingSpeak(567);
   else if (x.startsWith(F("brg"  ))) menuEnterLedBrightness(trim(&line[3]));
   else if (x.startsWith(F("brf"  ))) EEPROM.put(EE_1B_BRG_FACTOR, (byte)(atoi(&line[4])));
-  else if (x.startsWith(F("gray" ))) switchGrayBox();
+//  else if (x.startsWith(F("gray" ))) switchGrayBox();
   //else if (x.startsWith(F("sim"  ))) simulateCO2();
   //else if (x.startsWith(F("ota"  ))) espOTA();
 //  else if (x.startsWith(F("ping" ))) espPing();
@@ -48,7 +48,7 @@ void handleCommand() {
   else if (x.startsWith(F("wsi"  ))) setWifiSendInterval(trim(&line[3]));
 //  else if (x.startsWith(F("esp"  ))) onlyESP();
   else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, (byte)(line[4]-'0'));
-  else if (x.startsWith(F("ccc"))) Serial << rawReadCM1106_CO2() << endl;
+  //else if (x.startsWith(F("ccc"))) Serial << rawReadCM1106_CO2() << endl;
   //else if (x.startsWith(F("beep"))) makeBeep();
   Serial << F(">") << endl;
 }

@@ -147,7 +147,8 @@ int sendTsInt(int value, int endpoint) {
   else if (endpoint == 3 && !makeGETRequestSAP(sendstr, value)) return -1;
 
   int i;
-  for (i=0; i < 7; i++) {
+  int maxTries = (endpoint == 1) ? 7 : 1;
+  for (i=0; i < maxTries; i++) {
     esp << F("AT+CIPSTART=\"TCP\",\"")<< (endpoint == 1 ? TS_IP : UBI_IP) << F("\",80") << endl;
     if (!serialFind(OK, true, 4000)) continue;
     
@@ -155,10 +156,10 @@ int sendTsInt(int value, int endpoint) {
     if (!serialFind(">", true, 6000)) continue;
   
     esp << sendstr;
-    if(serialFind("CLOSED", true, 6000)) break;
+    if(serialFind("CLOSED", true, 16000)) break;
   }
     
-  return i < 7;
+  return i < maxTries;
 }
 
 
@@ -182,20 +183,23 @@ int sendToThingSpeak(int value) {
 
 uint32_t tmWifiSent = 0;
 void processSendData() {
+  Serial << '1' << isWifiInit() << endl;
   if (!isWifiInit())  {
+    Serial << '2' << endl;
     setWifiStat("Setup Wifi");
     return;
   }
   if (sPPM == 0) return;
+  Serial << '3' << endl;
   int16_t wifiSendInterval;
   EEPROM.get(EE_2B_WIFI_SND_INT_S, wifiSendInterval);
   if (wifiSendInterval <= 1) wifiSendInterval = 120;
+  Serial << wifiSendInterval << endl;
   if (!timePassed(tmWifiSent, 1000L * wifiSendInterval)) return;
-
+  Serial << 5 << endl;
   int res = sendToThingSpeak(sPPM);
   
   Serial << endl << F("TS RES: ") << res << endl;
-  espOFF();
   tmWifiSent = millis();
   
 }

@@ -30,7 +30,8 @@
 boolean DEBUG=false;
 boolean ESP_DEBUG = true;
 
-#define TGS4161
+//#define TGS4161
+//#define GRAY
 
 //#define ANALOG_READ_PRECISION 15
 //uuuuu
@@ -110,8 +111,15 @@ void setup() {
   if (DEBUG) {
     Serial <<  F("\n\nDeG\n\n");
   } 
-  Serial << F("vAir CO2 Monitor: v1.9.3\n");// << endl;
+#ifdef TGS4161
+  Serial << F("vAir CO2 Monitor: v1.9.4\n");// << endl;
+#else
+  Serial << F("vAir CO2 Monitor NDIR: v1.9.4 \n");// << endl;
+#endif
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
+  int16_t wifiSendInterval;
+  EEPROM.get(EE_2B_WIFI_SND_INT_S, wifiSendInterval);
+  Serial << F("Send Interval: ") << wifiSendInterval << endl;
 //  Serial << CM1106__getCO2() << endl;
 //  startSerialProxy();
 //  #ifndef TGS4161

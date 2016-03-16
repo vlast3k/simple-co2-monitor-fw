@@ -26,7 +26,7 @@ void handleCommand() {
   String x = String(line);
   Serial << line << endl;
   if      (x.startsWith(F("wifi"))) doConnect();
-  else if (x.startsWith(F( "lt" ))) menuEnterColorRanges(trim(&line[2]));
+//  else if (x.startsWith(F( "lt" ))) menuEnterColorRanges(trim(&line[2]));
   else if (x.startsWith(F("debug"))) switchDebugInfoPrint();
   else if (x.startsWith(F("reset"))) menuMainFactoryReset();
   else if (x.startsWith(F("tskey"))) saveLineToEE(trim(&line[5]), EE_40B_TSKEY);
@@ -132,6 +132,7 @@ int menuMainFactoryReset() {
   return 0;
 }
 
+#ifdef GRAY
 int switchGrayBox() {
   byte val = EEPROM.read(EE_1B_ISGRAY);
   if (val == 255) val = 1;
@@ -143,6 +144,7 @@ int switchGrayBox() {
   //Serial << endl;
   return 0;
 }
+#endif
 
 int switchDebugInfoPrint() {
   dumpDebuggingInfo = !dumpDebuggingInfo;

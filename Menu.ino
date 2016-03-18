@@ -26,7 +26,7 @@ void handleCommand() {
   String x = String(line);
   Serial << line << endl;
   if      (x.startsWith(F("wifi"))) doConnect();
-//  else if (x.startsWith(F( "lt" ))) menuEnterColorRanges(trim(&line[2]));
+  else if (x.startsWith(F( "lt" ))) menuEnterColorRanges(trim(&line[2]));
   else if (x.startsWith(F("debug"))) switchDebugInfoPrint();
   else if (x.startsWith(F("reset"))) menuMainFactoryReset();
   else if (x.startsWith(F("tskey"))) saveLineToEE(trim(&line[5]), EE_40B_TSKEY);

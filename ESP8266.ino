@@ -98,8 +98,8 @@ boolean makeGETRequestTS(char *s, int value) {
   char key[30];
   EEPROM.get(EE_40B_TSKEY, key);
   
-  Serial << endl << F("TS KEY:") << key << endl;
   if (key[0] == 0 || key[0] == -1) return false; //no tskey
+  Serial << endl << F("TS KEY:") << key << endl;
 
   raCO2Change.addValue(lastCO2 ? value - lastCO2 : 0);
 #ifdef TGS4161
@@ -164,39 +164,34 @@ int sendTsInt(int value, int endpoint) {
 
 
 int sendToThingSpeak(int value) {
-  int res, res2;
+  int res, res2, res3;
   
   if (!initESPForSending() && !initESPForSending()) res = 0; // try to connect to Wifi 2x
   else {
     res = sendTsInt(value, 1);
     res2 = sendTsInt(value, 2);
-    res2 = sendTsInt(value, 3);
+    res3 = sendTsInt(value, 3);
   }
   espOFF();
   lastCO2 = value;
-  if (res == 0) setWifiStat("No Wi-Fi");
-  else if (res == 1) setWifiStat("OK");
-  else if (res == -1) setWifiStat("No TS Key");
+  if (res == 1 || res2 == 1 || res3 == 1) { setWifiStat("OK"); EEPROM.put(EE_1B_WIFIINIT, 1);}
+  else if (res == 0 || res2 == 0 || res3 == 0) setWifiStat("No Wi-Fi");
+  else if (res == -1 || res2 == -1 || res3 == -1) setWifiStat("No Cfg");
   else if (res < -1 ) setWifiStat("Error");
   return res;  
 }
 
 uint32_t tmWifiSent = 0;
 void processSendData() {
-  Serial << '1' << isWifiInit() << endl;
   if (!isWifiInit())  {
-    Serial << '2' << endl;
     setWifiStat("Setup Wifi");
     return;
   }
   if (sPPM == 0) return;
-  Serial << '3' << endl;
   int16_t wifiSendInterval;
   EEPROM.get(EE_2B_WIFI_SND_INT_S, wifiSendInterval);
   if (wifiSendInterval <= 1) wifiSendInterval = 120;
-  Serial << wifiSendInterval << endl;
   if (!timePassed(tmWifiSent, 1000L * wifiSendInterval)) return;
-  Serial << 5 << endl;
   int res = sendToThingSpeak(sPPM);
   
   Serial << endl << F("TS RES: ") << res << endl;

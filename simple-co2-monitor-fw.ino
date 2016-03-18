@@ -1,3 +1,7 @@
+#define TGS4161
+#define GRAY
+
+
 #include <RunningAverage.h>
 #include <SoftwareSerial.h>
 //#include <avr/power.h>
@@ -30,8 +34,6 @@
 boolean DEBUG=false;
 boolean ESP_DEBUG = true;
 
-//#define TGS4161
-//#define GRAY
 
 //#define ANALOG_READ_PRECISION 15
 //uuuuu
@@ -112,23 +114,24 @@ void setup() {
     Serial <<  F("\n\nDeG\n\n");
   } 
 #ifdef TGS4161
-  Serial << F("vAir CO2 Monitor: v1.9.4\n");// << endl;
+  Serial << F("vAir CO2 Monitor: v1.10\n");// << endl;
 #else
-  Serial << F("vAir CO2 Monitor NDIR: v1.9.4 \n");// << endl;
+  Serial << F("vAir CO2 Monitor NDIR: v1.10\n");// << endl;
 #endif
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
   int16_t wifiSendInterval;
   EEPROM.get(EE_2B_WIFI_SND_INT_S, wifiSendInterval);
   Serial << F("Send Interval: ") << wifiSendInterval << endl;
+  if (!isWifiInit()) Serial << F("No WiFi configuration\n");
 //  Serial << CM1106__getCO2() << endl;
-//  startSerialProxy();
+//  startSerialP  roxy();
 //  #ifndef TGS4161
 //  Serial << CM1106__getCO2() << endl;
 //  Serial << CM1106__getCO2() << endl;
 //  Serial << CM1106__getCO2() << endl;
 //  #endif
   overrideBrightness = EEPROM.read(EE_1B_BRG);
-  checkEEVersion();
+  //checkEEVersion();
   initNeopixels();
   
   espOFF();
@@ -149,14 +152,14 @@ void setup() {
 //  Serial.println(F("Simple CO2 Monitor. Press any key to display menu"));
 }
 
-void checkEEVersion() {
-  byte eeVersion = EEPROM.get(0, eeVersion);
-  //Serial << F("EEPROM Version: ") << eeVersion << endl;
-  if (eeVersion != EE_VERSION) {
-    clearEEPROM();
-    EEPROM.put(0, EE_VERSION);
-  }
-}
+//void checkEEVersion() {
+//  byte eeVersion = EEPROM.get(0, eeVersion);
+//  //Serial << F("EEPROM Version: ") << eeVersion << endl;
+//  if (eeVersion != EE_VERSION) {
+//    clearEEPROM();
+//    EEPROM.put(0, EE_VERSION);
+//  }
+//}
 
 void setWifiStat(char* st) {
   if (!isWifiInit()) return;

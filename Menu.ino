@@ -33,7 +33,9 @@ void handleCommand() {
   else if (x.startsWith(F("ubik")))  saveLineToEE(trim(&line[4]), EE_40B_UBIKEY);
   else if (x.startsWith(F("ubiv")))  saveLineToEE(trim(&line[4]), EE_40B_UBIVAR);
   else if (x.startsWith(F("test")))  sendToThingSpeak(567);
+#ifdef BRG
   else if (x.startsWith(F("brg"  ))) menuEnterLedBrightness(trim(&line[3]));
+#endif
   else if (x.startsWith(F("brf"  ))) EEPROM.put(EE_1B_BRG_FACTOR, (byte)(atoi(&line[4])));
 //  else if (x.startsWith(F("gray" ))) switchGrayBox();
   //else if (x.startsWith(F("sim"  ))) simulateCO2();

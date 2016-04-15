@@ -4,7 +4,7 @@
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 #define COL1 pixels.Color(0,255,0)
-#define COL2 pixels.Color(180,255,0)
+#define COL2 pixels.Color(140,255,0)
 #define COL3 pixels.Color(255,255,0)
 #define COL4 pixels.Color(255,200,0)
 #define COL5 pixels.Color(255,120,0)

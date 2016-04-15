@@ -1,5 +1,6 @@
 #define TGS4161
 //#define GRAY
+//#define BRG
 
 
 #include <RunningAverage.h>

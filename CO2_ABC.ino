@@ -3,7 +3,7 @@ uint32_t CO2_FIRST_PROCESS_TIME; //=  60L*15*1000  //how much to wait before fir
 //#define CO2_FIRST_PROCESS_TIME 60L*15*1000  //how much to wait before first storing of the data usually 15 min
 
 int cfg_lowest_co2_ppm = 400;
-byte cfg_abc_resetHours = 200;
+byte cfg_abc_resetHours = 72;
 
 unsigned long lastEEPROMWrite = 0;
 unsigned long lastCO2Read = 0;

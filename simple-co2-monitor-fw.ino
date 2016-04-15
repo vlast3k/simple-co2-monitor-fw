@@ -1,5 +1,5 @@
 #define TGS4161
-#define GRAY
+//#define GRAY
 
 
 #include <RunningAverage.h>
@@ -114,9 +114,9 @@ void setup() {
     Serial <<  F("\n\nDeG\n\n");
   } 
 #ifdef TGS4161
-  Serial << F("vAir CO2 Monitor: v1.10\n");// << endl;
+  Serial << F("vAir CO2 Monitor: v1.11\n");// << endl;
 #else
-  Serial << F("vAir CO2 Monitor NDIR: v1.10\n");// << endl;
+  Serial << F("vAir CO2 Monitor NDIR: v1.11\n");// << endl;
 #endif
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
   int16_t wifiSendInterval;

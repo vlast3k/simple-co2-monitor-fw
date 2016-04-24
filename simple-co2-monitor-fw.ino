@@ -1,6 +1,6 @@
-#define TGS4161
+//#define TGS4161
 //#define GRAY
-//#define BRG
+#define BRG
 
 
 #include <RunningAverage.h>
@@ -58,6 +58,7 @@ boolean ESP_DEBUG = true;
 #define EE_1B_HASSAPCFG    180
 #define EE_2B_WIFI_SND_INT_S  181
 #define EE_1B_BRG_FACTOR  183
+#define EE_1B_RESET_CO2  184
 
 #define EE_VERSION 3
 
@@ -115,9 +116,9 @@ void setup() {
     Serial <<  F("\n\nDeG\n\n");
   } 
 #ifdef TGS4161
-  Serial << F("vAir CO2 Monitor: v1.11\n");// << endl;
+  Serial << F("vAir CO2 Monitor: v1.12\n");// << endl;
 #else
-  Serial << F("vAir CO2 Monitor NDIR: v1.11\n");// << endl;
+  Serial << F("vAir CO2 Monitor NDIR: v1.12\n");// << endl;
 #endif
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
   int16_t wifiSendInterval;

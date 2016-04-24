@@ -73,7 +73,7 @@ void processBrightness() {
   if (overrideBrightness == 255) { 
     raLight.addValue(analogReadFine(LIGHT_PIN, 1));
     int maxLightRead = EEPROM.read(EE_1B_ISGRAY) == 1 ? 400 : 1000;
-    int light = (int)(raLight.getAverage() * getBrgFactor());
+    int light = (int)((float)raLight.getAverage() * getBrgFactor());
     int r=0;
     if (light <= 10) {
       sBrightness = light;

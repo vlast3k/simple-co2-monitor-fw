@@ -45,8 +45,8 @@ void handleCommand() {
   else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
 #ifdef TGS4161
   else if (x.startsWith(F("ppx"  ))) setPPX(trim(&line[3]));
-  else if (x.startsWith(F("rco"  ))) resetCO2();
 #endif
+  else if (x.startsWith(F("rco"  ))) resetCO2();
   else if (x.startsWith(F("wsi"  ))) setWifiSendInterval(trim(&line[3]));
 //  else if (x.startsWith(F("esp"  ))) onlyESP();
   else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, (byte)(line[4]-'0'));
@@ -98,12 +98,19 @@ void setPPX(char *val) {
   storeCurrentCO2MaxMv();  
 }
 
+#endif
+
 void resetCO2() {
+#ifdef TGS4161
   EEPROM.put(EE_FLT_CURRENT_PERIOD_CO2_HIGHESTMV, (double)0);
   EEPROM.put(EE_FLT_PREV_PERIOD_CO2_HIGHESTMV,    (double)0);
   prevCO2MaxMv = currentCO2MaxMv = 0;
-}
+#else
+  Serial << F("Put the device at fresh air. Once it worked for 7 minutes after it startted it will start the calibration procedure, which is 2 minutes. ") << endl;
+  EEPROM.put(EE_1B_RESET_CO2, (byte)1);
+  softwareReset();
 #endif
+}
 
 //void onlyESP() {
 //  pinMode(ESP_RX, INPUT);
@@ -149,6 +156,7 @@ int switchGrayBox() {
 #endif
 
 int switchDebugInfoPrint() {
+  DEBUG=true;
   dumpDebuggingInfo = !dumpDebuggingInfo;
   Serial << endl  << F("Debug Info is: ") << dumpDebuggingInfo << endl;
   if (dumpDebuggingInfo) displayDebugInfo();

@@ -209,6 +209,7 @@ void loop() {
   #ifdef USELIB
     sPPM = cubicCo2.getCO2();
     startedCO2Monitoring = cubicCo2.hasStarted();
+    delay(3000);
   #else
     sPPM = CM1106__getCO2();
     delay(3000);

@@ -1,7 +1,16 @@
 //#define TGS4161
 //#define GRAY
 #define BRG
+#define USELIB
 
+#ifndef TGS4161
+#ifdef USELIB
+#include <CubicGasSensors.h>
+#endif
+#endif
+
+#ifndef USELIB
+#endif
 
 #include <RunningAverage.h>
 #include <SoftwareSerial.h>
@@ -105,6 +114,10 @@ byte sBrightness = 10;
 uint16_t sPPM = 0;
 char *wifiStat = "n/a";
 
+#ifdef USELIB
+ CubicGasSensors cubicCo2(SS_RX, SS_TX, EE_1B_RESET_CO2);
+#endif
+
 //Timer *beepTimer = new Timer(60L*5L*1000L);
 /*
  * MAX Sketch size should be less than 0x7000 28672 bytes to work with stupid bootloaders
@@ -145,6 +158,7 @@ void setup() {
   setWifiStat("");
   //makeBeep();
  // tone(A4, 200);
+
   
  //beepTimer->setOnTimer(&handleBeep);
  // beepTimer->Start();
@@ -172,7 +186,11 @@ void setWifiStat(char* st) {
 void displayDebugInfo() {
   debugInfoCO2ABC();
   #ifndef TGS4161
-  debugInfoCM1106();
+    #ifdef USELIB
+      cubicCo2.printDebugInfo();
+    #else
+     debugInfoCM1106();
+    #endif
   #endif
   debugInfoNeopixel();
   Serial << endl;
@@ -188,8 +206,13 @@ void loop() {
 #ifdef TGS4161
   processCO2();
 #else
-  sPPM = CM1106__getCO2();
-  delay(3000);
+  #ifdef USELIB
+    sPPM = cubicCo2.getCO2();
+    startedCO2Monitoring = cubicCo2.hasStarted();
+  #else
+    sPPM = CM1106__getCO2();
+    delay(3000);
+  #endif
   //Serial << "co2: " << sPPM << endl;
 #endif
   //oledTechnicalDetails();

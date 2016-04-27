@@ -1,3 +1,4 @@
+#ifndef USELIB
 #ifndef TGS4161
 RunningAverage raCM1106(2);
 
@@ -8,7 +9,7 @@ byte getCS(byte* buf) {
 }
 boolean validateCS(byte* resp) {
   if (resp[0] != 0x16) {
-    Serial << "bad resp" << endl;
+    Serial << F("bad resp") << endl;
     return false;
   }
   if (resp[resp[1]+2] != getCS(resp)) {
@@ -87,4 +88,5 @@ void debugInfoCM1106() {
   Serial << "CM1106 raw: " << rawReadCM1106_CO2() << endl;
 }
 
+#endif
 #endif

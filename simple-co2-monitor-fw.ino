@@ -1,12 +1,9 @@
 //#define TGS4161
 //#define GRAY
 #define BRG
-#define USELIB
 
 #ifndef TGS4161
-#ifdef USELIB
 #include <CubicGasSensors.h>
-#endif
 #endif
 
 #ifndef USELIB
@@ -114,7 +111,7 @@ byte sBrightness = 10;
 uint16_t sPPM = 0;
 char *wifiStat = "n/a";
 
-#ifdef USELIB
+#ifndef TGS4161
  CubicGasSensors cubicCo2(SS_RX, SS_TX, EE_1B_RESET_CO2);
 #endif
 
@@ -186,11 +183,7 @@ void setWifiStat(char* st) {
 void displayDebugInfo() {
   debugInfoCO2ABC();
   #ifndef TGS4161
-    #ifdef USELIB
-      cubicCo2.printDebugInfo();
-    #else
-     debugInfoCM1106();
-    #endif
+    cubicCo2.printDebugInfo();
   #endif
   debugInfoNeopixel();
   Serial << endl;
@@ -206,15 +199,9 @@ void loop() {
 #ifdef TGS4161
   processCO2();
 #else
-  #ifdef USELIB
-    sPPM = cubicCo2.getCO2();
-    startedCO2Monitoring = cubicCo2.hasStarted();
-    delay(3000);
-  #else
-    sPPM = CM1106__getCO2();
-    delay(3000);
-  #endif
-  //Serial << "co2: " << sPPM << endl;
+  sPPM = cubicCo2.getCO2();
+  startedCO2Monitoring = cubicCo2.hasStarted();
+  delay(3000);
 #endif
   //oledTechnicalDetails();
   //oledAll();

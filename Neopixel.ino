@@ -1,7 +1,3 @@
-#include <Adafruit_NeoPixel.h>
-
-#define NUMPIXELS      6
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 #define COL1 pixels.Color(0,255,0)
 #define COL2 pixels.Color(140,255,0)
@@ -92,6 +88,12 @@ void processBrightness() {
 
 void processColors() {
   if (!sPPM) return;
+  if (sPPM == -1) {
+    pixels.clear();
+    pixels.setPixelColor(0, pixels.Color(0, 0, 255));
+    pixels.show();
+    return;
+  }
   byte idx = ppm2idx(sPPM);
   uint32_t color = idx2color(idx);
   byte i = 0;

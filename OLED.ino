@@ -33,6 +33,13 @@ void oledCO2Level() {
         u8g.setPrintPos(100, 47);
         u8g << F("sec");
       }
+      #ifndef TGS4161
+      if (sPPM == -1) {
+        u8g.setFont(u8g_font_profont11r);
+        u8g.setPrintPos(20, 40);
+        u8g << F("Calibrating");       
+      }
+      #endif
     }
    // u8g << "2292";
     

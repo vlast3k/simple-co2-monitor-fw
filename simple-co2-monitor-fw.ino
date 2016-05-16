@@ -16,6 +16,9 @@
 #include <EEPROM.h>
 //#include <MemoryFree.h>
 //#include <Timer.h>
+#include <Adafruit_NeoPixel.h>
+
+
 
 //#define PIN            A0
 #define PIN            A1
@@ -108,11 +111,17 @@ byte overrideBrightness;
 //float brgFactor;
 boolean dumpDebuggingInfo = false;
 byte sBrightness = 10;
-uint16_t sPPM = 0;
+int16_t sPPM = 0;
 char *wifiStat = "n/a";
 
+#define NUMPIXELS      6
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
 #ifndef TGS4161
- CubicGasSensors cubicCo2(SS_RX, SS_TX, EE_1B_RESET_CO2);
+void onCo2Status(CubicStatus status) {
+}
+
+ CubicGasSensors cubicCo2(SS_RX, SS_TX, onCo2Status, EE_1B_RESET_CO2);
 #endif
 
 //Timer *beepTimer = new Timer(60L*5L*1000L);
@@ -149,8 +158,8 @@ void setup() {
   espOFF();
 #ifdef TGS4161
   initCO2ABC();
-//#else
-//  Serial << F("CO2 value: ") << rawReadCM1106_CO2() << endl;
+#else
+  //Serial << F("CO2 value: ") << cubicCo2.rawReadCM1106_CO2() << endl;
 #endif
   setWifiStat("");
   //makeBeep();
@@ -199,8 +208,10 @@ void loop() {
 #ifdef TGS4161
   processCO2();
 #else
-  sPPM = cubicCo2.getCO2();
+  int x = cubicCo2.getCO2(DEBUG);
   startedCO2Monitoring = cubicCo2.hasStarted();
+  if (startedCO2Monitoring) sPPM = x;
+  if (x == -1) sPPM = -1;
   delay(3000);
 #endif
   //oledTechnicalDetails();

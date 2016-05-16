@@ -28,7 +28,7 @@ void handleCommand() {
   if      (x.startsWith(F("wifi"))) doConnect();
   else if (x.startsWith(F( "lt" ))) menuEnterColorRanges(trim(&line[2]));
   else if (x.startsWith(F("debug"))) switchDebugInfoPrint();
-  else if (x.startsWith(F("reset"))) menuMainFactoryReset();
+  else if (x.startsWith(F("factory"))) menuMainFactoryReset();
   else if (x.startsWith(F("tskey"))) saveLineToEE(trim(&line[5]), EE_40B_TSKEY);
   else if (x.startsWith(F("ubik")))  saveLineToEE(trim(&line[4]), EE_40B_UBIKEY);
   else if (x.startsWith(F("ubiv")))  saveLineToEE(trim(&line[4]), EE_40B_UBIVAR);

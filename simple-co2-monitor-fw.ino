@@ -9,6 +9,7 @@
 #ifndef USELIB
 #endif
 
+
 #include <RunningAverage.h>
 #include <SoftwareSerial.h>
 //#include <avr/power.h>
@@ -121,7 +122,7 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ80
 void onCo2Status(CubicStatus status) {
 }
 
- CubicGasSensors cubicCo2(SS_RX, SS_TX, onCo2Status, EE_1B_RESET_CO2);
+CubicGasSensors cubicCo2(onCo2Status, EE_1B_RESET_CO2, SS_RX, SS_TX);
 #endif
 
 //Timer *beepTimer = new Timer(60L*5L*1000L);

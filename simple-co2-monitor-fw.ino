@@ -2,14 +2,6 @@
 //#define GRAY
 #define BRG
 
-#ifndef TGS4161
-#include <CubicGasSensors.h>
-#endif
-
-#ifndef USELIB
-#endif
-
-
 #include <RunningAverage.h>
 #include <SoftwareSerial.h>
 //#include <avr/power.h>
@@ -19,7 +11,7 @@
 //#include <Timer.h>
 #include <Adafruit_NeoPixel.h>
 
-
+boolean timePassed(unsigned long since, unsigned long interval);
 
 //#define PIN            A0
 #define PIN            A1
@@ -119,6 +111,7 @@ char *wifiStat = "n/a";
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 #ifndef TGS4161
+#include <CubicGasSensors.h>
 void onCo2Status(CubicStatus status) {
 }
 
@@ -160,6 +153,7 @@ void setup() {
 #ifdef TGS4161
   initCO2ABC();
 #else
+  //cubicCo2.init();
   //Serial << F("CO2 value: ") << cubicCo2.rawReadCM1106_CO2() << endl;
 #endif
   setWifiStat("");

@@ -65,11 +65,16 @@ float getBrgFactor() {
   return (float)(bb==255?10:bb) / 10;
   
 }
+#define BRG_CHECK_TIMEOUT 10000
+uint32_t lastBrgCheck = 0;
 void processBrightness() {
+  if (timePassed(lastBrgCheck, BRG_CHECK_TIMEOUT) == false) return;
+  lastBrgCheck = millis();
   if (overrideBrightness == 255) { 
     raLight.addValue(analogReadFine(LIGHT_PIN, 1));
     int maxLightRead = EEPROM.read(EE_1B_ISGRAY) == 1 ? 400 : 1000;
     int light = (int)((float)raLight.getAverage() * getBrgFactor());
+    //Serial << "ralig: " << raLight.getAverage() << ", brg:" << getBrgFactor() << endl;
     int r=0;
     if (light <= 10) {
       sBrightness = light;
@@ -81,6 +86,7 @@ void processBrightness() {
     //Serial << maxLightRead << "." << r << "." << sBrightness << "." << maxBrightness << endl;
   } else {
     sBrightness = overrideBrightness;
+   //Serial << "ldr: " << analogReadFine(LIGHT_PIN, 1) << endl;
   }
   pixels.setBrightness(sBrightness);
   pixels.show();
@@ -111,7 +117,7 @@ void processColors() {
 //}
 
 uint32_t lastNeoPixelChange = 0;
-#define NEOPIXEL_TIMEOUT 5000L
+#define NEOPIXEL_TIMEOUT 1000L
 
 void processNeopixels() {
   if (timePassed(lastNeoPixelChange, NEOPIXEL_TIMEOUT) == false) return;

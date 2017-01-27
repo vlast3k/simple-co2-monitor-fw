@@ -1,4 +1,4 @@
-//#define TGS4161
+#define TGS4161
 //#define GRAY
 #define BRG
 
@@ -35,8 +35,14 @@ boolean timePassed(unsigned long since, unsigned long interval);
 #define ANALOG_READ_PRECISION 10
 
 boolean DEBUG=false;
-boolean ESP_DEBUG = true;
-
+//boolean ESP_DEBUG = true;
+bool hasESP = false;
+bool espWifiConfigured = false; 
+bool espWifiConnected = false; 
+uint32_t espLastActivity = 0;
+#define LINE_LEN 100
+char line[LINE_LEN];
+enum CommandSource {FROM_SERIAL, FROM_ESP};
 
 //#define ANALOG_READ_PRECISION 15
 //uuuuu
@@ -111,11 +117,11 @@ char *wifiStat = "n/a";
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 #ifndef TGS4161
-#include <CubicGasSensors.h>
+#include "CubicGasSensors\CubicGasSensors.h"
 void onCo2Status(CubicStatus status) {
 }
 
-CubicGasSensors cubicCo2(onCo2Status, EE_1B_RESET_CO2, SS_RX, SS_TX);
+CubicGasSensors cubicCo2(onCo2Status, EE_1B_RESET_CO2, &Serial, SS_RX, SS_TX);
 #endif
 
 //Timer *beepTimer = new Timer(60L*5L*1000L);
@@ -123,6 +129,8 @@ CubicGasSensors cubicCo2(onCo2Status, EE_1B_RESET_CO2, SS_RX, SS_TX);
  * MAX Sketch size should be less than 0x7000 28672 bytes to work with stupid bootloaders
  */
 void setup() {
+  //startSerialProxy();
+
   Serial.begin(9600);  
  // esp.begin(9600);
   if (DEBUG) {
@@ -137,7 +145,7 @@ void setup() {
   int16_t wifiSendInterval;
   EEPROM.get(EE_2B_WIFI_SND_INT_S, wifiSendInterval);
   Serial << F("Send Interval: ") << wifiSendInterval << endl;
-  if (!isWifiInit()) Serial << F("No WiFi configuration\n");
+  //if (!isWifiInit()) Serial << F("No WiFi configuration\n");
 //  Serial << CM1106__getCO2() << endl;
 //  startSerialP  roxy();
 //  #ifndef TGS4161
@@ -149,7 +157,7 @@ void setup() {
   //checkEEVersion();
   initNeopixels();
   
-  espOFF();
+  espToggle();
 #ifdef TGS4161
   initCO2ABC();
 #else
@@ -179,7 +187,7 @@ void setup() {
 //}
 
 void setWifiStat(char* st) {
-  if (!isWifiInit()) return;
+  if (!hasESP) return;
   wifiStat = st;
   oledCO2Level();
 }
@@ -187,7 +195,7 @@ void setWifiStat(char* st) {
 void displayDebugInfo() {
   debugInfoCO2ABC();
   #ifndef TGS4161
-    cubicCo2.printDebugInfo();
+    //cubicCo2.printDebugInfo();
   #endif
   debugInfoNeopixel();
   Serial << endl;
@@ -201,13 +209,18 @@ void displayDebugInfo() {
 void loop() {
   //Serial <<"." << endl;
 #ifdef TGS4161
-  processCO2();
+  if (millis() - espLastActivity > 15000) {
+    uint32_t x = millis();
+    processCO2();
+    x = millis() - x;
+    Serial << "process CO2: " << x << endl;
+  }
 #else
-  int x = cubicCo2.getCO2(DEBUG);
-  startedCO2Monitoring = cubicCo2.hasStarted();
-  if (startedCO2Monitoring) sPPM = x;
-  if (x == -1) sPPM = -1;
-  delay(3000);
+  //int x = cubicCo2.getCO2(DEBUG);
+//  startedCO2Monitoring = cubicCo2.hasStarted();
+//  if (startedCO2Monitoring) sPPM = x;
+//  if (x == -1) sPPM = -1;
+  //delay(3000);
 #endif
   //oledTechnicalDetails();
   //oledAll();
@@ -220,9 +233,11 @@ void loop() {
     oledCO2Level();
  // }
   processUserInput();
-  processSendData();
+  //processSendData();
+  //Serial << "." << endl;
   //beepTimer->Update();
   //delay(10000);
+  //delay(100);
 //
 //  sendToThingSpeak("", 234);
 //  fixBaudRate();

@@ -39,10 +39,15 @@ boolean DEBUG=false;
 bool hasESP = false;
 bool espWifiConfigured = false; 
 bool espWifiConnected = false; 
+bool espSentInit = false;
+
 uint32_t espLastActivity = 0;
 #define LINE_LEN 100
 char line[LINE_LEN];
 enum CommandSource {FROM_SERIAL, FROM_ESP};
+bool espIsOn = false;
+bool espWasTurnedOff = false;
+bool espStoppedOnce = false;
 
 //#define ANALOG_READ_PRECISION 15
 //uuuuu
@@ -67,6 +72,8 @@ enum CommandSource {FROM_SERIAL, FROM_ESP};
 #define EE_2B_WIFI_SND_INT_S  181
 #define EE_1B_BRG_FACTOR  183
 #define EE_1B_RESET_CO2  184
+#define EE_1B_GRADIENT  185
+#define EE_FLT_PREV_PERIOD_CO2_ATTEMP 186
 
 #define EE_VERSION 3
 
@@ -90,6 +97,8 @@ boolean startedCO2Monitoring = false;
 #define EE_4B_HOUR 12
 double currentCO2MaxMv = 0;
 double prevCO2MaxMv = 0;
+double currentMaxMvTemp = 0;
+double prevMaxMvTemp = 0;
 RunningAverage raCO2mv(4);
 RunningAverage raCO2mvNoTempCorr(4);
 RunningAverage raTempC(4);
@@ -110,7 +119,7 @@ byte overrideBrightness;
 //float brgFactor;
 boolean dumpDebuggingInfo = false;
 byte sBrightness = 10;
-int16_t sPPM = 0;
+int32_t sPPM = 0;
 char *wifiStat = "n/a";
 
 #define NUMPIXELS      6
@@ -119,7 +128,7 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ80
 #ifndef TGS4161
 #include "CubicGasSensors\CubicGasSensors.h"
 void onCo2Status(CubicStatus status) {
-}
+} 
 
 CubicGasSensors cubicCo2(onCo2Status, EE_1B_RESET_CO2, &Serial, SS_RX, SS_TX);
 #endif
@@ -128,10 +137,25 @@ CubicGasSensors cubicCo2(onCo2Status, EE_1B_RESET_CO2, &Serial, SS_RX, SS_TX);
 /*
  * MAX Sketch size should be less than 0x7000 28672 bytes to work with stupid bootloaders
  */
+#define LOG_OF_350 log10(400.0d)
+uint8_t GRADIENT = 71;
+double mv2ppm(double mv, int grad) { return pow((double)10, mv / grad + LOG_OF_350); }
+double ppm2mv(int ppm, int grad) { return (log10((double)ppm) - LOG_OF_350) * grad; }
+void findGradient();
+void testGradient() ;
 void setup() {
   //startSerialProxy();
 
   Serial.begin(9600);  
+  Serial << "ra dev" << endl;
+  raDeviation(raTempC);
+  Serial << "end ra dev" << endl;
+  EEPROM.get(EE_1B_GRADIENT, GRADIENT);
+  if (GRADIENT == 255) GRADIENT = 71;
+  Serial << "Gradient: " << GRADIENT << endl;
+  for (int i=400; i < 2000; i+=200) Serial << "ppm:" << i << ",mv: " << ppm2mv(i, GRADIENT) << endl;
+  //findGradient();
+  //delay(10000);
  // esp.begin(9600);
   if (DEBUG) {
     Serial <<  F("\n\nDeG\n\n");
@@ -156,8 +180,6 @@ void setup() {
   overrideBrightness = EEPROM.read(EE_1B_BRG);
   //checkEEVersion();
   initNeopixels();
-  
-  espToggle();
 #ifdef TGS4161
   initCO2ABC();
 #else
@@ -165,16 +187,10 @@ void setup() {
   //Serial << F("CO2 value: ") << cubicCo2.rawReadCM1106_CO2() << endl;
 #endif
   setWifiStat("");
-  //makeBeep();
- // tone(A4, 200);
 
-  
- //beepTimer->setOnTimer(&handleBeep);
- // beepTimer->Start();
-  //tone(1, 20000, 1000);
-  //initCO2ABC();
-//  sPPM= 2222;
-//  Serial.println(F("Simple CO2 Monitor. Press any key to display menu"));
+  loopTGS4161();
+  //espOFF();
+  espToggle();
 }
 
 //void checkEEVersion() {
@@ -191,8 +207,10 @@ void setWifiStat(char* st) {
   wifiStat = st;
   oledCO2Level();
 }
-
+uint32_t lastDebugInfoPrint = 0;
 void displayDebugInfo() {
+  if (!timePassed(lastDebugInfoPrint, 5000)) return;
+  lastDebugInfoPrint = millis();
   debugInfoCO2ABC();
   #ifndef TGS4161
     //cubicCo2.printDebugInfo();
@@ -205,23 +223,28 @@ void displayDebugInfo() {
 // // Serial << F("testBEEP\n");
 //  if (sPPM > 1800 && sBrightness > 1) makeBeep();
 //}
+void loopTGS4161() {
+#ifdef TGS4161
+  if (!espIsOn || timePassed(espLastActivity, 15000)) {
+    //Serial << "process CO2 calling"<< endl;
+    processCO2();
+  }
+#endif
+}
 
 void loop() {
   //Serial <<"." << endl;
-#ifdef TGS4161
-  if (millis() - espLastActivity > 15000) {
-    uint32_t x = millis();
-    processCO2();
-    x = millis() - x;
-    Serial << "process CO2: " << x << endl;
+  if (espIsOn && !espStoppedOnce && (millis() > 5L*60*1000)) {
+    espOFF();
+    espStoppedOnce = true;
   }
-#else
+  loopTGS4161();
   //int x = cubicCo2.getCO2(DEBUG);
 //  startedCO2Monitoring = cubicCo2.hasStarted();
 //  if (startedCO2Monitoring) sPPM = x;
 //  if (x == -1) sPPM = -1;
   //delay(3000);
-#endif
+//#endif
   //oledTechnicalDetails();
   //oledAll();
   processNeopixels();
@@ -233,7 +256,7 @@ void loop() {
     oledCO2Level();
  // }
   processUserInput();
-  //processSendData();
+  processSendData();
   //Serial << "." << endl;
   //beepTimer->Update();
   //delay(10000);

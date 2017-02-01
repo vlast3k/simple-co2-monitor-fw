@@ -48,7 +48,7 @@ void clearEEPROM() {
 }
 
 int getFloat(float f) {
-  return (f - (int)f)*10;
+  return (f - (int)f)*100;
 }
 
 

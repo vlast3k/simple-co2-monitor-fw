@@ -13,7 +13,8 @@ void oledCO2Level() {
     if (sBrightness == 1) u8g.setFont(u8g_font_profont11r);
     else                  u8g.setFont(u8g_font_fub35n);
     u8g.setPrintPos(sPPM < 1000? 33: 5, 47);
-    if (sPPM > 0) u8g << sPPM;
+    if (sPPM > 10000) u8g << sPPM/1000 << "**";
+    else if (sPPM > 0) u8g << sPPM;
     u8g.setFont(u8g_font_profont11r);
     u8g.setPrintPos(0, 7);
     u8g << wifiStat;
@@ -22,7 +23,7 @@ void oledCO2Level() {
       u8g << F("Warmup...");
       if (sPPM == 0 && millis() > 4000) {
 #ifdef TGS4161
-        uint32_t sec = (CO2_FIRST_PROCESS_TIME - millis()) / 1000L;
+        uint32_t sec = (CO2_FIRST_PROCESS_TIME - millis()) / (1000L*60L);
 #else
         uint32_t sec = (130000L - millis()) / 1000L;
 #endif
@@ -31,7 +32,11 @@ void oledCO2Level() {
         u8g << sec;
         u8g.setFont(u8g_font_profont11r);
         u8g.setPrintPos(100, 47);
+#ifdef TGS4161
+        u8g << F("min");
+#else
         u8g << F("sec");
+#endif
       }
       #ifndef TGS4161
       if (sPPM == -1) {

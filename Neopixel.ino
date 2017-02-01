@@ -10,7 +10,7 @@ uint32_t colors[] = {COL1, COL2, COL3, COL4, COL5, COL6};
 //uint16_t colorRanges[] = {700, 1000, 1300, 1600, 1900};
 byte maxBrightness = 120;
 
-byte ppm2idx(int ppm) {
+byte ppm2idx(uint32_t ppm) {
   int rng;
   for (byte i=0; i < 5; i++) {
     EEPROM.get(EE_10B_TH + i*2, rng);
@@ -90,6 +90,17 @@ void processBrightness() {
   }
   pixels.setBrightness(sBrightness);
   pixels.show();
+}
+
+void ledHeat(bool turnOn) {
+  pixels.begin();
+  for (int i=0; i< 6; i++) {
+    if (turnOn) pixels.setPixelColor(i, pixels.Color(255, 255, 255));
+    else pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+  //pixels.setBrightness(20);
+  pixels.show();
+  
 }
 
 void processColors() {

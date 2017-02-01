@@ -2,6 +2,8 @@ byte readLine(int timeout, Stream *stream);
 void onESPvESPrino();
 void sendNow();
 
+bool espStopOnReady = false;
+
 void processUserInput() {
   if (Serial.available()) {
     if (readLine(30000, &Serial) > 0) {
@@ -71,10 +73,16 @@ void handleCommand(CommandSource cs) {
     else if (x.startsWith(F("proxy"))) startSerialProxy();
     else if (x.startsWith(F("ppm"  ))) setPPM(trim(&line[3]));
   #ifdef TGS4161
+    else if (x.startsWith(F("ppg"  ))) setPPG(trim(&line[3]));
     else if (x.startsWith(F("ppx"  ))) setPPX(trim(&line[3]));
   #endif
     else if (x.startsWith(F("rco"  ))) resetCO2();
     else if (x.startsWith(F("wsi"  ))) setWifiSendInterval(trim(&line[3]));
+    else if (x.startsWith(F("eoff"  ))) espOFF();
+    else if (x.startsWith(F("test"  ))) processSendData();
+    else if (x.startsWith(F("heat"  ))) testHeating(true);
+    else if (x.startsWith(F("cool"  ))) testHeating(false);
+    
   //  else if (x.startsWith(F("esp"  ))) onlyESP();
 //    else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, (byte)(line[4]-'0'));
     //else if (x.startsWith(F("ccc"))) Serial << rawReadCM1106_CO2() << endl;
@@ -82,18 +90,40 @@ void handleCommand(CommandSource cs) {
     Serial << F(">") << endl;
   } else {
    // Serial << F("e:") << line[0] << endl;  
-    if (x.startsWith(F("vESPrino"))) onESPvESPrino(); 
+    if (x.indexOf(F("vESPrino")) > -1) onESPvESPrino(); 
     if (x.startsWith(F("wifi.ssid="))) espWifiConfigured = true; 
-    if (x.indexOf(F("GOT IP"))) espWifiConnected = true; 
+    if (x.indexOf(F("Device ini")) > -1) onESPDeviceInitialized(); 
+    if (x.indexOf(F("GOT IP")) > -1) espWifiConnected = true; 
+    if (x.indexOf(F("ready")) > -1) onESPReady(); 
     Serial << F("e:") << line << endl;  
+  }
+}
+
+void onESPDeviceInitialized() {
+  sendNow();
+  if (espWasTurnedOff) {
+    espStopOnReady = true;
+  }
+}
+
+void onESPReady() {
+  if (espStopOnReady) {
+    espStopOnReady = false;
+    espOFF();
   }
 }
 
 void onESPvESPrino() {
   hasESP = true;
+  if (espSentInit) return;
+  espSentInit = true;
   //Serial << "detected ESP" << endl;
-  espSend(String(F("prop_setr \"logger.slow\",\"1\"\r\n")).c_str());
-  espSend(String(F("prop_list\r\n")).c_str());
+  String s = String(F("***prop_setr \"send.interval\",\"0\"***prop_setr \"logger.slow\",\"1\"***prop_list wifi.ssid***prop_jsetr \"serial.dump\"0***\r\n"));
+  if (espWasTurnedOff) {
+    s = String(F("***slave")) + s;
+  }
+  espSend(s.c_str());
+  //espSend(String(F("prop_list\r\n")).c_str());
 }
 
 
@@ -136,7 +166,15 @@ void setWifiSendInterval(char *val) {
 #ifdef TGS4161
 void setPPX(char *val) {
   currentCO2MaxMv = getTGSEstMaxMv(atoi(val), raCO2mv.getAverage());
-  storeCurrentCO2MaxMv();  
+  currentMaxMvTemp = raTempC.getAverage();
+  storeABC();
+}
+void setPPG(char *val) {
+  //int realPPM = atoi(val);
+  double mv = getCO2MaxMv() - raCO2mv.getAverage();
+  findAndStoreCorrectGradient(mv, 200000L);
+//  currentCO2MaxMv = getTGSEstMaxMv(atoi(val), raCO2mv.getAverage());
+//  storeCurrentCO2MaxMv();  
 }
 
 #endif
@@ -197,7 +235,7 @@ int switchGrayBox() {
 #endif
 
 int switchDebugInfoPrint() {
-  DEBUG=true;
+  //DEBUG=true;
   dumpDebuggingInfo = !dumpDebuggingInfo;
   Serial << endl  << F("Debug Info is: ") << dumpDebuggingInfo << endl;
   if (dumpDebuggingInfo) displayDebugInfo();
@@ -213,21 +251,25 @@ int simulateCO2() {
   }
 }
 
-//int doConnect() {
-//  Serial << endl << F("Connecting to Wifi...\n");
-//  espToggle();
-//  if (!serialFind("ready", ESP_DEBUG, 10000)) {
-//    Serial << F("Wifi module not working\n");
-//  } else {
-//    Serial.flush();
-//    delay(1000);
-//    int res = setESPWifi(trim(&line[4]));
-//    if (res < 0) {
-//      Serial << F("Could not connect to Wifi: ") << res << endl;
-//    } else {
-//      setWifiStat("WiFi OK");
-//    }
-//  }
-//}
+void testHeating(bool turnOn) {
+  if (turnOn) espON();
+  else espOFF();
+  ledHeat(turnOn);
+  float startMv = raCO2mvNoTempCorr.getAverage();
+  float startTemp = raTempC.getAverage();
+  for (int i=0; i < 250; i++) {
+    char s[100];
+    float diffMv = startMv - raCO2mvNoTempCorr.getAverage();
+    float diffTemp = startTemp - raTempC.getAverage();
+    Serial << i << ", mvDiff: " << diffMv << ", tempDiff:" << diffTemp << ", mvNow:" << raCO2mvNoTempCorr.getAverage() << ", tempNow:" << raTempC.getAverage() << endl;
+//    sprintf(s, "%d, mv %d.%d, temp:%d,%2d\n", i, (int)diffMv, getFloat(diffMv), (int)diffTemp, getFloat(diffTemp));
+//    displayDebugInfo();
+//    Serial << s;
+    if ((i%5) == 0 && turnOn) espToggle();
+     processCO2();
+    delay(4000);
+  }
+
+}
 
       

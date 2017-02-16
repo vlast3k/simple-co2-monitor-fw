@@ -1,7 +1,7 @@
 #ifdef TGS4161
 
 #define REFTEMP 38.0D  //when the temperature at home is 22c, inside it is 38, so it is good middle point
-#define TEMPCORR 0.0D
+#define TEMPCORR 0.2D
 //#define TEMPCORR 0.6D
 //TEMP CORR 0.44D
 #define GAIN 5.7f
@@ -44,10 +44,10 @@ void findGradient() {
 double tempAdjustMv(double mv) {
   double refTemp = (prevMaxMvTemp > 1) ? prevMaxMvTemp : currentMaxMvTemp;
   if (refTemp < 1) return mv;
-  double diff = raTempC.getAverage() - refTemp;
+  double diff = refTemp - raTempC.getAverage();
   if (diff > 4) diff = 4;
   else if (diff < -4) diff = -4;
-  return mv + diff * 0.4F;
+  return mv + diff * 0.45F;
 }
 
 double getCO2_Mv(double v, boolean tcorr) {

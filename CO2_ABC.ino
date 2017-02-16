@@ -71,7 +71,7 @@ double raDeviation(RunningAverage &ra) {
 
 void processABC() {
   if (currentCO2MaxMv == 0 || ((raCO2mv.getAverage() > currentCO2MaxMv) &&
-     (raDeviation(raCO2mv) < 0.04F && raDeviation(raTempC) < 0.02F))) {
+     (raDeviation(raCO2mv) < 0.06F && raDeviation(raTempC) < 0.06F))) {
       currentCO2MaxMv  = raCO2mv.getAverage();
       currentMaxMvTemp = raTempC.getAverage();
     }

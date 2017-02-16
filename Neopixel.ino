@@ -5,6 +5,7 @@
 #define COL4 pixels.Color(255,200,0)
 #define COL5 pixels.Color(255,120,0)
 #define COL6 pixels.Color(255,0,0)
+#define BLUE pixels.Color(0,0,255)
 uint32_t colors[] = {COL1, COL2, COL3, COL4, COL5, COL6};
 #define DEFAULT_COLOR_RANGES "700 1000 1300 1600 1900 "
 //uint16_t colorRanges[] = {700, 1000, 1300, 1600, 1900};
@@ -12,6 +13,12 @@ byte maxBrightness = 120;
 
 byte ppm2idx(uint32_t ppm) {
   int rng;
+  if (ppm > 6000) return 1;
+  else if (ppm > 10000) return 2;
+  else if (ppm > 20000) return 3;
+  else if (ppm > 40000L) return 4;
+  else if (ppm > 80000L) return 5;
+  else if (ppm > 160000L) return 6;
   for (byte i=0; i < 5; i++) {
     EEPROM.get(EE_10B_TH + i*2, rng);
     if (ppm < rng) return i;
@@ -19,7 +26,8 @@ byte ppm2idx(uint32_t ppm) {
   return 5;
 }
 
-uint32_t idx2color(byte idx) {
+uint32_t idx2color(byte idx, uint32_t ppm) {
+  if (ppm > 6000) return BLUE;
   return colors[idx];
 }
 
@@ -112,7 +120,7 @@ void processColors() {
     return;
   }
   byte idx = ppm2idx(sPPM);
-  uint32_t color = idx2color(idx);
+  uint32_t color = idx2color(idx, sPPM);
   byte i = 0;
   for (; i <= idx     ; i++) pixels.setPixelColor(i, color);
   for (; i < NUMPIXELS; i++) pixels.setPixelColor(i, 0);

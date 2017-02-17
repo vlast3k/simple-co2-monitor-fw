@@ -13,6 +13,7 @@ void processUserInput() {
   }
   //Serial <<"next" << endl;
   int i=0, k=0;
+  //esp.listen();
   if (espIsOn && esp.available()) {
       //Serial <<"aloooo" << endl;
 
@@ -75,13 +76,13 @@ void handleCommand(CommandSource cs) {
   #ifdef TGS4161
     else if (x.startsWith(F("ppg"  ))) setPPG(trim(&line[3]));
     else if (x.startsWith(F("ppx"  ))) setPPX(trim(&line[3]));
+    else if (x.startsWith(F("heat"  ))) testHeating(true);
+    else if (x.startsWith(F("cool"  ))) testHeating(false);
   #endif
     else if (x.startsWith(F("rco"  ))) resetCO2();
     else if (x.startsWith(F("wsi"  ))) setWifiSendInterval(trim(&line[3]));
     else if (x.startsWith(F("eoff"  ))) espOFF();
     else if (x.startsWith(F("test"  ))) processSendData();
-    else if (x.startsWith(F("heat"  ))) testHeating(true);
-    else if (x.startsWith(F("cool"  ))) testHeating(false);
     
   //  else if (x.startsWith(F("esp"  ))) onlyESP();
 //    else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, (byte)(line[4]-'0'));
@@ -177,6 +178,27 @@ void setPPG(char *val) {
 //  storeCurrentCO2MaxMv();  
 }
 
+void testHeating(bool turnOn) {
+  if (turnOn) espON();
+  else espOFF();
+  ledHeat(turnOn);
+  float startMv = raCO2mvNoTempCorr.getAverage();
+  float startTemp = raTempC.getAverage();
+  for (int i=0; i < 250; i++) {
+    char s[100];
+    float diffMv = startMv - raCO2mvNoTempCorr.getAverage();
+    float diffTemp = startTemp - raTempC.getAverage();
+    Serial << i << ", mvDiff: " << diffMv << ", tempDiff:" << diffTemp << ", mvNow:" << raCO2mvNoTempCorr.getAverage() << ", tempNow:" << raTempC.getAverage() << endl;
+//    sprintf(s, "%d, mv %d.%d, temp:%d,%2d\n", i, (int)diffMv, getFloat(diffMv), (int)diffTemp, getFloat(diffTemp));
+//    displayDebugInfo();
+//    Serial << s;
+    if ((i%5) == 0 && turnOn) espToggle();
+     processCO2();
+    delay(4000);
+  }
+
+}
+
 #endif
 
 void resetCO2() {
@@ -251,25 +273,5 @@ int simulateCO2() {
   }
 }
 
-void testHeating(bool turnOn) {
-  if (turnOn) espON();
-  else espOFF();
-  ledHeat(turnOn);
-  float startMv = raCO2mvNoTempCorr.getAverage();
-  float startTemp = raTempC.getAverage();
-  for (int i=0; i < 250; i++) {
-    char s[100];
-    float diffMv = startMv - raCO2mvNoTempCorr.getAverage();
-    float diffTemp = startTemp - raTempC.getAverage();
-    Serial << i << ", mvDiff: " << diffMv << ", tempDiff:" << diffTemp << ", mvNow:" << raCO2mvNoTempCorr.getAverage() << ", tempNow:" << raTempC.getAverage() << endl;
-//    sprintf(s, "%d, mv %d.%d, temp:%d,%2d\n", i, (int)diffMv, getFloat(diffMv), (int)diffTemp, getFloat(diffTemp));
-//    displayDebugInfo();
-//    Serial << s;
-    if ((i%5) == 0 && turnOn) espToggle();
-     processCO2();
-    delay(4000);
-  }
-
-}
 
       

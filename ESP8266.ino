@@ -1,6 +1,13 @@
 char OK[] = "OK";
 char GOTIP[] = "GOT IP";
 
+void espPause() {
+  esp.end();
+}
+
+void espResume() {
+  esp.begin(9600);  
+}
 
 void espON() {
   Serial << " ESP Turn on " << endl;
@@ -59,7 +66,7 @@ void sendNow() {
 #else
 void sendNow() {
   char s[100];
-  sprintf(s, "sendNow CO2,%d,LIGHT,%d\r\n", sPPM, (int)raLight.getAverage());
+  sprintf(s, "sendNow CO2,%ld,LIGHT,%d\r\n", sPPM, (int)raLight.getAverage());
   espSend(s);  
 }
 #endif

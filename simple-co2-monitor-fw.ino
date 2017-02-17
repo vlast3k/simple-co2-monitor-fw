@@ -126,11 +126,13 @@ char *wifiStat = "n/a";
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 #ifndef TGS4161
-#include "CubicGasSensors\CubicGasSensors.h"
+//#include "CubicGasSensors\CubicGasSensors.h"
+#include <CubicGasSensors.h>
 void onCo2Status(CubicStatus status) {
 } 
 
 CubicGasSensors cubicCo2(onCo2Status, EE_1B_RESET_CO2, &Serial, SS_RX, SS_TX);
+//CubicGasSensors cubicCo2(onCo2Status, EE_1B_RESET_CO2, &Serial, 1,1);
 #endif
 
 //Timer *beepTimer = new Timer(60L*5L*1000L);
@@ -147,13 +149,13 @@ void setup() {
   //startSerialProxy();
 
   Serial.begin(9600);  
-  Serial << "ra dev" << endl;
-  raDeviation(raTempC);
-  Serial << "end ra dev" << endl;
+//  Serial << "ra dev" << endl;
+//  raDeviation(raTempC);
+//  Serial << "end ra dev" << endl;
   EEPROM.get(EE_1B_GRADIENT, GRADIENT);
   if (GRADIENT == 255) GRADIENT = 71;
   Serial << "Gradient: " << GRADIENT << endl;
-  for (int i=400; i < 2000; i+=200) Serial << "ppm:" << i << ",mv: " << ppm2mv(i, GRADIENT) << endl;
+//  for (int i=400; i < 2000; i+=200) Serial << "ppm:" << i << ",mv: " << ppm2mv(i, GRADIENT) << endl;
   //findGradient();
   //delay(10000);
  // esp.begin(9600);
@@ -161,9 +163,9 @@ void setup() {
     Serial <<  F("\n\nDeG\n\n");
   } 
 #ifdef TGS4161
-  Serial << F("vAir CO2 Monitor: v1.12\n");// << endl;
+  Serial << F("vAir CO2 Monitor: v2.0\n");// << endl;
 #else
-  Serial << F("vAir CO2 Monitor NDIR: v1.12\n");// << endl;
+  Serial << F("vAir CO2 Monitor NDIR: v2.0\n");// << endl;
 #endif
   Serial << F("Visit 'vair-monitor.com' for configuration details\n");// << endl;
   int16_t wifiSendInterval;
@@ -232,6 +234,21 @@ void loopTGS4161() {
 #endif
 }
 
+void loopCubic() {
+#ifndef TGS4161
+  if (!espIsOn || timePassed(espLastActivity, 15000)) {
+    //Serial << "time passed: " << timePassed(espLastActivity, 20000) << ", " << millis() - espLastActivity << endl;
+    espPause();
+    int x = cubicCo2.getCO2(DEBUG);
+    espResume();
+    startedCO2Monitoring = cubicCo2.hasStarted();
+    if (startedCO2Monitoring) sPPM = x;
+    if (x == -1) sPPM = -1;
+    delay(1000);
+  }
+#endif
+}
+
 void loop() {
   //Serial <<"." << endl;
   if (espIsOn && !espStoppedOnce && (millis() > 5L*60*1000)) {
@@ -239,6 +256,7 @@ void loop() {
     espStoppedOnce = true;
   }
   loopTGS4161();
+  loopCubic();
   //int x = cubicCo2.getCO2(DEBUG);
 //  startedCO2Monitoring = cubicCo2.hasStarted();
 //  if (startedCO2Monitoring) sPPM = x;

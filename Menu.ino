@@ -88,6 +88,7 @@ void handleCommand(CommandSource cs) {
 //    else if (x.startsWith(F("sap "))) EEPROM.put(EE_1B_HASSAPCFG, (byte)(line[4]-'0'));
     //else if (x.startsWith(F("ccc"))) Serial << rawReadCM1106_CO2() << endl;
     else if (x.startsWith(F("esp"))) esp << &x[4] << endl;
+    else if (x.indexOf(F("LED##")) > -1) onLED(x); 
     Serial << F(">") << endl;
   } else {
    // Serial << F("e:") << line[0] << endl;  
@@ -96,6 +97,8 @@ void handleCommand(CommandSource cs) {
     if (x.indexOf(F("Device ini")) > -1) onESPDeviceInitialized(); 
     if (x.indexOf(F("GOT IP")) > -1) espWifiConnected = true; 
     if (x.indexOf(F("ready")) > -1) onESPReady(); 
+    if (x.indexOf(F("LED##")) > -1) onLED(x); 
+    if (x.startsWith(F("ppm##"  ))) setPPM(&line[5]));
     Serial << F("e:") << line << endl;  
   }
 }
@@ -123,6 +126,8 @@ void onESPvESPrino() {
   if (espWasTurnedOff) {
     s = String(F("***slave")) + s;
   }
+  espSend(s.c_str());
+  s = "prop_jsetr \"led.ard\"1";
   espSend(s.c_str());
   //espSend(String(F("prop_list\r\n")).c_str());
 }

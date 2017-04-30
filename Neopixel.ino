@@ -10,6 +10,7 @@ uint32_t colors[] = {COL1, COL2, COL3, COL4, COL5, COL6};
 #define DEFAULT_COLOR_RANGES "700 1000 1300 1600 1900 "
 //uint16_t colorRanges[] = {700, 1000, 1300, 1600, 1900};
 byte maxBrightness = 120;
+uint32_t forcedColorMS = 0;
 
 byte ppm2idx(uint32_t ppm) {
   int rng;
@@ -111,19 +112,26 @@ void ledHeat(bool turnOn) {
   
 }
 
+uint32_t lastNeoPixelChange = 0;
+#define NEOPIXEL_TIMEOUT 1000L
+#define FORCEDLED_TIMEOUT 60000L
+
 void processColors() {
   if (!sPPM) return;
+  byte i = 0;
+  int adj = 0;
+  if (!timePassed(forcedColorMS, FORCEDLED_TIMEOUT)) adj = -1;
+  Serial << "adj: " << adj << endl;
   if (sPPM == -1) {
-    pixels.clear();
+    for (; i < NUMPIXELS + adj     ; i++) pixels.setPixelColor(i, 0);
     pixels.setPixelColor(0, pixels.Color(0, 0, 255));
     pixels.show();
     return;
   }
   byte idx = ppm2idx(sPPM);
   uint32_t color = idx2color(idx, sPPM);
-  byte i = 0;
-  for (; i <= idx     ; i++) pixels.setPixelColor(i, color);
-  for (; i < NUMPIXELS; i++) pixels.setPixelColor(i, 0);
+  for (; i <= idx + adj     ; i++) pixels.setPixelColor(i, color);
+  for (; i < NUMPIXELS + adj; i++) pixels.setPixelColor(i, 0);
   pixels.show(); 
 }
 
@@ -135,8 +143,7 @@ void processColors() {
 //  
 //}
 
-uint32_t lastNeoPixelChange = 0;
-#define NEOPIXEL_TIMEOUT 1000L
+
 
 void processNeopixels() {
   if (timePassed(lastNeoPixelChange, NEOPIXEL_TIMEOUT) == false) return;
@@ -150,3 +157,19 @@ void processNeopixels() {
     processBrightness(); 
  // }
 }
+void onLED(String &x) {
+  int a = x.indexOf(F("LED##")) + 5;
+  Serial << a << endl;
+  Serial << line + a << endl;
+  const char *p = strchr(line, ' ');
+  int r = atoi(p);
+  p = strchr(p + 1, ' ');
+  int g = atoi(p);
+  p = strchr(p + 1, ' ');
+  int b = atoi(p+1);
+  Serial <<"LED: " << r << "," << g << "," << b << endl;
+  pixels.setPixelColor(5, pixels.Color(r, g, b));
+  pixels.show();
+  forcedColorMS = millis();
+}
+

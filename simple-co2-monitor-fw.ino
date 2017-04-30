@@ -88,6 +88,7 @@ int sendToThingSpeak(int);
 void debugInfoCM1106();
 #endif
 
+void onLED(String &x);
 boolean startedCO2Monitoring = false;
 
 #ifdef TGS4161
@@ -149,6 +150,9 @@ void setup() {
   //startSerialProxy();
 
   Serial.begin(9600);  
+  String rr = "LED##12 13 14";
+  strcpy(line, rr.c_str());
+  onLED(rr);
 //  Serial << "ra dev" << endl;
 //  raDeviation(raTempC);
 //  Serial << "end ra dev" << endl;
@@ -251,10 +255,10 @@ void loopCubic() {
 
 void loop() {
   //Serial <<"." << endl;
-  if (espIsOn && !espStoppedOnce && (millis() > 5L*60*1000)) {
-    espOFF();
-    espStoppedOnce = true;
-  }
+//  if (espIsOn && !espStoppedOnce && (millis() > 5L*60*1000)) {
+//    espOFF();
+//    espStoppedOnce = true;
+//  }
   loopTGS4161();
   loopCubic();
   //int x = cubicCo2.getCO2(DEBUG);
